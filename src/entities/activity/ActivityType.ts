@@ -1,7 +1,7 @@
 import { ActivityType as SWFActivtyType, Workflow } from 'simple-swf/build/src/entities'
 import { ActivityTask } from 'simple-swf/build/src/tasks'
 import { BaseActivity, FTLActivity } from './BaseActivity'
-import { Config } from './Config'
+import { Config } from '../../Config'
 
 export class ActivityType extends SWFActivtyType {
   ActivityHandler: typeof FTLActivity

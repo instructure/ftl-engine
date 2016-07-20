@@ -3,7 +3,7 @@ import * as fs from 'fs'
 import * as _ from 'lodash'
 import { ActivityType } from './ActivityType'
 import { FTLActivity } from './BaseActivity'
-import { Config } from './Config'
+import { Config } from '../../Config'
 export class ActivityRegistry {
   config: Config
   activities: {[name: string]: ActivityType}

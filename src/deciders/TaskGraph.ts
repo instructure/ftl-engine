@@ -1,8 +1,8 @@
 import { Decider, Workflow } from 'simple-swf/build/src/entities'
 import { DecisionTask, EventData } from 'simple-swf/build/src/tasks'
-import { Config } from './Config'
-import { Logger } from './Logger'
-import { ActivityRegistry } from './ActivityRegistry'
+import { Config } from '../Config'
+import { Logger } from '../lib/Logger'
+import { ActivityRegistry } from '../entities/activity/ActivityRegistry'
 export interface TaskGraphNode {
   type: 'decision' | 'activity'
   handler: string

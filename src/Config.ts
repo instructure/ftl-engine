@@ -1,9 +1,10 @@
 import * as path from 'path'
 import { SWFConfig, ConfigOverrides } from 'simple-swf/build/src/SWFConfig'
-import { Logger } from './Logger'
-import { Notifier, SNSNotifier, SNSNotiferConfig } from './Notifier'
-import { MetricReporter, StatsDMetricReporter, StatsDMetricReporterConfig } from './MetricReporter'
-import { ActivityRegistry } from './ActivityRegistry'
+import { Logger } from './lib/Logger'
+import { Notifier, SNSNotifier, SNSNotiferConfig } from './lib/Notifier'
+import { MetricReporter, StatsDMetricReporter, StatsDMetricReporterConfig } from './lib/MetricReporter'
+import { ActivityRegistry } from './entities/activity/ActivityRegistry'
+
 export class Config {
   swfConfig: SWFConfig
   logger: Logger

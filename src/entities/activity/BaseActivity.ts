@@ -2,7 +2,7 @@ import { Activity as SWFActivity, ActivityType, Workflow } from 'simple-swf/buil
 import { ActivityTask } from 'simple-swf/build/src/tasks'
 import { StopReasons } from 'simple-swf/build/src/interfaces'
 
-import { Config } from './Config'
+import { Config } from '../../Config'
 export interface FTLRunCallabck {
   (Error?: any, any?: any, Object?: any): any;
 }

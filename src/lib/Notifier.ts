@@ -1,7 +1,9 @@
 import { EventEmitter } from 'events'
 import { SNS } from 'aws-sdk'
-import { Config } from './Config'
-import { LogLevels } from './interfaces'
+
+import { Config } from '../Config'
+import { LogLevels } from './Logger'
+
 export interface Notifier {
   sendInfo(event: any, summary: string, cb: OptionalCB): any
   sendWarn(event: any, summary: string, cb: OptionalCB): any

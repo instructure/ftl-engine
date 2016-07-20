@@ -1,5 +1,5 @@
 import SDC = require('statsd-client')
-import { Config } from './Config'
+import { Config } from '../Config'
 
 export interface MetricReporter {
   increment(name: string, count?: number, meta?: Object): any;

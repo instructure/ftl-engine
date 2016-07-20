@@ -1,13 +1,15 @@
+import * as _ from 'lodash'
+
 import { ActivityWorker as SWFActivityWorker } from 'simple-swf/build/src/workers'
 import { ActivityTask } from 'simple-swf/build/src/tasks'
 import { Activity, Workflow } from 'simple-swf/build/src/entities'
 import { ConfigOverride } from 'simple-swf/build/src/SWFConfig'
 import { ActivityStatus, StopReasons } from 'simple-swf/build/src/interfaces'
-import { Config } from './Config'
-import { Logger, LogWorkerMixin } from './Logger'
-import { applyMixins } from './util'
-import { LogLevels } from './interfaces'
-import * as _ from 'lodash'
+
+import { Config } from '../Config'
+import { Logger, LogWorkerMixin, LogLevels } from '../lib/Logger'
+import { applyMixins } from '../util'
+
 class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin {
   ftlConfig: Config
   workerName: string

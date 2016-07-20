@@ -6,10 +6,9 @@ import { Decider } from 'simple-swf/build/src/entities'
 import { ConfigOverride } from 'simple-swf/build/src/SWFConfig'
 import { DecisionTask } from 'simple-swf/build/src/tasks'
 
-import { Logger, LogWorkerMixin } from './Logger'
-import { LogLevels } from './interfaces'
-import { applyMixins } from './util'
-import { Config } from './Config'
+import { Logger, LogWorkerMixin, LogLevels } from '../lib/Logger'
+import { Config } from '../Config'
+import { applyMixins } from '../util'
 
 export interface WorkflowWithParent extends SWF.WorkflowExecution {
   parentWorkflowId: string
