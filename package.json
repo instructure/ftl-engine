@@ -1,0 +1,45 @@
+{
+  "name": "ftl-engine",
+  "version": "0.0.1",
+  "description": "A scalable, fault-tolerant distributed task runner for complex workflows",
+  "main": "index.js",
+  "scripts": {
+    "pretest": "npm run build",
+    "test": "mocha --require source-map-support/register build/test/*Test.js build/test/**/*Test.js && npm run lint",
+    "testSingle": "./testSingle.sh",
+    "lint": "tslint src/*.ts src/**/*.ts",
+    "clean": "rm -rf build",
+    "build-full": "npm run clean && npm run typings && tsc",
+    "build": "tsc",
+    "typings": "npm run typings-clean && typings install",
+    "typings-clean": "rm -rf src/typings",
+    "prepublish": "npm run build-full",
+    "coverage": "npm run build && istanbul cover _mocha --  build/test/*Test.js build/test/**/*Test.js"
+  },
+  "keywords": [
+    "workflow",
+    "etl",
+    "graph-execution",
+    "ftl",
+    "engine"
+  ],
+  "author": "addisonj",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.3",
+    "mocha": "^2.4.5",
+    "sinon": "^1.17.3",
+    "source-map-support": "^0.4.0",
+    "tslint": "^3.7.4",
+    "typescript": "^2.0.0",
+    "typings": "^1.3.1"
+  },
+  "dependencies": {
+    "async": "^2.0.0-rc.3",
+    "aws-sdk": "^2.4.7",
+    "in-publish": "^2.0.0",
+    "lodash": "^4.10.0",
+    "statsd-client": "^0.2.2"
+  }
+}
