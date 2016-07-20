@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { SWFConfig, ConfigOverrides } from 'simple-swf/src/SWFConfig'
+import { SWFConfig, ConfigOverrides } from 'simple-swf/build/src/SWFConfig'
 import { Logger } from './Logger'
 import { Notifier, SNSNotifier, SNSNotiferConfig } from './Notifier'
 import { MetricReporter, StatsDMetricReporter, StatsDMetricReporterConfig } from './MetricReporter'

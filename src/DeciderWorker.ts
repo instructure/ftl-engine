@@ -1,10 +1,10 @@
 import { SWF } from 'aws-sdk'
 import * as _ from 'lodash'
 
-import { DeciderWorker as SWFDeciderWorker } from 'simple-swf/src/workers'
-import { Decider } from 'simple-swf/src/entities'
-import { ConfigOverride } from 'simple-swf/src/SWFConfig'
-import { DecisionTask } from 'simple-swf/src/tasks'
+import { DeciderWorker as SWFDeciderWorker } from 'simple-swf/build/src/workers'
+import { Decider } from 'simple-swf/build/src/entities'
+import { ConfigOverride } from 'simple-swf/build/src/SWFConfig'
+import { DecisionTask } from 'simple-swf/build/src/tasks'
 
 import { Logger, LogWorkerMixin } from './Logger'
 import { LogLevels } from './interfaces'

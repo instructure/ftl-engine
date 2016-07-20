@@ -1,5 +1,5 @@
-import { Decider, Workflow } from 'simple-swf/src/entities'
-import { DecisionTask, EventData } from 'simple-swf/src/tasks'
+import { Decider, Workflow } from 'simple-swf/build/src/entities'
+import { DecisionTask, EventData } from 'simple-swf/build/src/tasks'
 import { Config } from './Config'
 import { Logger } from './Logger'
 import { ActivityRegistry } from './ActivityRegistry'

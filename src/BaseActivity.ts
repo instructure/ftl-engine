@@ -1,6 +1,6 @@
-import { Activity as SWFActivity, ActivityType, Workflow } from 'simple-swf/src/entities'
-import { ActivityTask } from 'simple-swf/src/tasks'
-import { StopReasons } from 'simple-swf/src/interfaces'
+import { Activity as SWFActivity, ActivityType, Workflow } from 'simple-swf/build/src/entities'
+import { ActivityTask } from 'simple-swf/build/src/tasks'
+import { StopReasons } from 'simple-swf/build/src/interfaces'
 
 import { Config } from './Config'
 export interface FTLRunCallabck {

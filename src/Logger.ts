@@ -1,5 +1,5 @@
 import { Logger as BunyanLogger } from 'bunyan'
-import { Task } from 'simple-swf/src/tasks'
+import { Task } from 'simple-swf/build/src/tasks'
 import { LogLevels } from './interfaces'
 export class Logger {
   logger: BunyanLogger

@@ -9,7 +9,6 @@
     "lodash": "registry:dt/lodash#3.10.0+20160720001309",
     "mocha": "registry:dt/mocha#2.2.5+20160720003353",
     "node": "registry:dt/node#6.0.0+20160720070758",
-    "shortid": "registry:dt/shortid#0.0.0+20160316155526",
     "sinon": "registry:dt/sinon#1.16.0+20160517064723",
     "statsd-client": "registry:dt/statsd-client#0.1.0+20160316155526"
   }
