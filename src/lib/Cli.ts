@@ -1,10 +1,16 @@
-import * as yargs from 'yargs'
 import * as path from 'path'
 import * as fs from 'fs'
+import { Readable } from 'stream'
+
+import * as yargs from 'yargs'
+import * as _ from 'lodash'
+
 import { Config } from '../Config'
 import { ActivityWorker, DeciderWorker } from '../workers'
 import { registration } from '../init'
 import { validator } from './validator'
+import { Processor, genUtil, MetadataStore } from '../generator'
+import { StringToStream } from './StringToStream'
 
 export class Cli {
   config: Config
@@ -17,16 +23,21 @@ export class Cli {
     this.cli = yargs
     .usage('Usage: $0 -c <jsConf> <command> [args...]')
     .demand(1)
-    .option('config', {
-      alias: 'c',
-      describe: 'js config module to load',
-      demand: true,
-      global: true,
-      string: true
-    })
-    .command('submit <input>', 'submit the file (or - for stdin) as an ftl-engine task', {}, this.submit.bind(this, cb))
+    .command('submit <input>', 'submit the file (or - for stdin) as an ftl-engine task', (yargs) => {
+    return yargs.reset().option('config', {
+        alias: 'c',
+        describe: 'js config module to load',
+        demand: true,
+        string: true
+      }) as any
+    }, this.submit.bind(this, cb))
     .command('start', 'start ftl-engine with specified components', (yargs) => {
-      return yargs.option('activity', {
+      return yargs.reset().option('config', {
+        alias: 'c',
+        describe: 'js config module to load',
+        demand: true,
+        string: true
+      }).option('activity', {
         alias: 'a',
         description: 'start the activty worker',
         default: true,
@@ -38,6 +49,27 @@ export class Cli {
         boolean: true,
       }) as any
     }, this.start.bind(this, cb))
+    .command('generate <directory>', 'generate an ftl task from the directory', (yargs) => {
+      return yargs.reset().option('data', {
+        alias: 'd',
+        description: 'metadata to load on start, either a path to a file or a json string',
+        string: true
+      }).option('exclude', {
+        alias: 'x',
+        description: 'exclude a list of top level stages to not process, comma seperated',
+        string: true
+      }).option('whitelist', {
+        alias: 'w',
+        description: 'include only a list of top level stages to process, comma seperated (takes precedence over exclude)',
+        string: true
+      }).option('output', {
+        alias: 'o',
+        description: 'output location, defaults to stdout',
+        string: true,
+        default: '-',
+        normalize: true
+      }) as any
+    }, this.generate.bind(this, cb))
     this.cli.argv
     return this.cli
   }
@@ -149,6 +181,44 @@ export class Cli {
       if (err) return cb(err, false)
       this.config.logger.info('started decider worker')
       cb(null, true)
+    })
+  }
+  generate(cb: {(err: Error | null)}, args: any) {
+
+    const outStream = args.output === '-' ? process.stdout : fs.createWriteStream(path.join(process.cwd(), args.output))
+
+    const toRun = path.join(process.cwd(), args.directory)
+    let initialMeta = {}
+    const exclude: string[] = args.exclude ? args.exclude.split(',') : []
+    const whitelist: string[] = args.whitelist ? args.whitelist.split(',') : []
+    if (args.data) {
+      let isJsonStr = false
+      try {
+        initialMeta = JSON.parse(args.data)
+        isJsonStr = true
+      } catch (e) {
+      }
+      if (!isJsonStr) {
+        initialMeta = require(path.join(process.cwd(), args.data))
+      }
+    }
+    genUtil.readDirectory(toRun, function(err, info) {
+      if (err) return cb(err)
+      if (!info) return cb(new Error('unexpected, missing info'))
+      // exclude directories
+      if (whitelist.length) {
+        info.dirs = whitelist
+      } else {
+        info.dirs = _.difference(info.dirs, exclude)
+      }
+      if (err) throw err
+      let p = new Processor(new MetadataStore(initialMeta), toRun, info.files, info.dirs)
+      p.process({}, function(err, output) {
+        if (err) throw err
+        const instream = new StringToStream(JSON.stringify(output, null, 2))
+
+        instream.pipe(outStream)
+      })
     })
   }
 }

@@ -21,6 +21,9 @@ export interface TaskGraphGraph {
   edges: {
     [name: string]: string[]
   }
+  revEdges?: {
+    [name: string]: string[]
+  }
   sourceNode: string
   sinkNode: string
 }
@@ -28,11 +31,12 @@ export interface TaskGraphParameters {
   graph: TaskGraphGraph
 }
 export interface TaskGraphGraphNode extends TaskGraphNode {
-  parameters: TaskGraphParameters
+  parameters: TaskGraphParameters,
+  maxRetry?: number
 }
 export interface TaskGraphMarkerNode extends TaskGraphNode {
-  paramters: {
-      status: string
+  parameters: {
+    status: string
   }
 }
 type AllNodeTypes = TaskGraphNode | TaskGraphGraphNode | TaskGraphMarkerNode
