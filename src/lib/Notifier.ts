@@ -11,7 +11,7 @@ export interface Notifier {
 }
 export interface SNSNotiferConfig {
   snsTopicName: string
-  snsRegion: string
+  region: string
   awsAccountId: string
   silenceNotifier: boolean
   snsClient: SNS | null
@@ -28,8 +28,7 @@ export class SNSNotifier extends EventEmitter implements Notifier {
     super()
     this.config = config
     this.mainConfig = mainConfig
-    this.snsClient = config.snsClient || new SNS({ region: this.config.snsRegion })
-
+    this.snsClient = config.snsClient || new SNS({ region: this.config.region })
   }
   sendDebug(event: any, summary: string, cb: OptionalCB) {
     this.sendLevel('debug', event, summary, cb)
@@ -44,13 +43,13 @@ export class SNSNotifier extends EventEmitter implements Notifier {
     this.sendLevel('error', event, summary, cb)
   }
   getArn(): string {
-    return `arn:aws:sns:${this.config.snsRegion}:${this.config.awsAccountId}:${this.config.snsTopicName}`
+    return `arn:aws:sns:${this.config.region}:${this.config.awsAccountId}:${this.config.snsTopicName}`
   }
   sendLevel(level: LogLevels, event: any, summary: string, cb: OptionalCB) {
     let params = {
       TopicArn: this.getArn(),
       Message: this.buildMessage(level, event, summary),
-      Subject: level + " - " + summary
+      Subject: level + ' - ' + summary
     }
     if (this.config.silenceNotifier) return
     cb = cb || function (err?: Error, resp?: SNS.PublishResponse) {

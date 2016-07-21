@@ -1,13 +1,14 @@
 import { ActivityType as SWFActivtyType, Workflow } from 'simple-swf/build/src/entities'
 import { ActivityTask } from 'simple-swf/build/src/tasks'
 import { BaseActivity, FTLActivity } from './BaseActivity'
+import { BaseHandler } from '../BaseHandler'
 import { Config } from '../../Config'
 
-export class ActivityType extends SWFActivtyType {
+export class ActivityType extends SWFActivtyType implements BaseHandler {
   ActivityHandler: typeof FTLActivity
   config: Config
   constructor(HandlerClass: typeof FTLActivity, loadLocation: string, config: Config) {
-    const version = config.version
+    const version = HandlerClass.version || config.defaultVersion
     const maxRetry = config.maxRetry
     super(HandlerClass.getHandlerName(), version, BaseActivity, { maxRetry: maxRetry })
     this.ActivityHandler = HandlerClass
@@ -18,6 +19,9 @@ export class ActivityType extends SWFActivtyType {
   }
   getHandlerName(): string {
     return this.ActivityHandler.getHandlerName()
+  }
+  validateTask(parameters: any): string | null {
+    return this.ActivityHandler.validateTask(parameters)
   }
   getMaxConcurrent(): number | null {
     return this.ActivityHandler.maxConcurrent || null

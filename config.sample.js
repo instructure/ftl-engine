@@ -1,18 +1,26 @@
 let path = require('path')
 module.exports = function() {
   return {
-    activities: [
-      path.join(__dirname, '../activities')
-      'my-npm-module',
-      'another-npm-module'
-    ],
+    defaultVersion: '1.0.0',
+    notifier: {
+      region: process.env.AWS_REGION || 'us-east-1',
+      snsTopicName: 'ftl-enginge-alerts',
+      awsAccountId: '123456789'
+    },
+    logger: {
+      name: 'ftl-engine'
+    },
     swf: {
-      domain: 'ftl-engine-prod'
+      domainName: process.env.SWF_DOMAIN || 'ftl-engine-test',
+      workflowName: 'ftl-engine'
     },
-    notififier: {
-      snsTopic:
-
+    metrics: {
+      host: 'localhost',
+      port: 5678
     },
-    logger:
+    claimCheck: {
+      bucket: 'ftl-check-store',
+      prefix: ''
+    }
   }
 }

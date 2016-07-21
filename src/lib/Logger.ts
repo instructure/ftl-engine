@@ -1,24 +1,32 @@
-import { Logger as BunyanLogger } from 'bunyan'
+import { Logger as BunyanLogger, createLogger} from 'bunyan'
 import { Task } from 'simple-swf/build/src/tasks'
+import * as _ from 'lodash'
 export type LogLevels = 'debug' | 'info' | 'warn' | 'error'
 
 export class Logger {
   logger: BunyanLogger
 
   constructor(name: string) {
-    this.logger = new BunyanLogger({ name: name })
+    this.logger = createLogger({name})
   }
-  debug(msg, meta) {
-    this.logger.debug(meta, msg)
+  debug(msg: string, meta?: Object) {
+    this.log('debug', msg, meta)
   }
-  info(msg, meta) {
-    this.logger.info(meta, msg)
+  info(msg: string, meta?: Object) {
+    this.log('info', msg, meta)
   }
-  warn(msg, meta) {
-    this.logger.warn(meta, msg)
+  warn(msg: string, meta?: Object) {
+    this.log('warn', msg, meta)
   }
-  error(msg, meta) {
-    this.logger.error(meta, msg)
+  error(msg: string, meta?: Object) {
+    this.log('error', msg, meta)
+  }
+  log(level: LogLevels, msg: string, meta?: Object) {
+    if (meta) {
+      this.logger[level](meta, msg)
+    } else {
+      this.logger[level](msg)
+    }
   }
 }
 
@@ -46,6 +54,6 @@ export class LogWorkerMixin {
       from: this.workerName,
       identity: this.identity,
     }
-    this.logger[level](_.defaults(metaOverrides || {}, baseMeta), msg)
+    this.logger[level](msg, _.defaults(metaOverrides || {}, baseMeta))
   }
 }

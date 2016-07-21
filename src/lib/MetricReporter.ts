@@ -2,22 +2,22 @@ import SDC = require('statsd-client')
 import { Config } from '../Config'
 
 export interface MetricReporter {
-  increment(name: string, count?: number, meta?: Object): any;
-  decrement(name: string, count?: number, meta?: Object): any;
-  counter(name: string, count: number, meta?: Object): any;
-  gauge(name: string, value: number, meta?: Object): any;
-  gaugeDelta(name: string, delta: number, meta?: Object): any;
-  set(name: string, value: number, meta?: Object): any;
-  timing(name: string, value: Date, meta?: Object): any;
-  timing(name: string, duration: number, meta?: Object): any;
+  increment(name: string, count?: number, meta?: Object): any
+  decrement(name: string, count?: number, meta?: Object): any
+  counter(name: string, count: number, meta?: Object): any
+  gauge(name: string, value: number, meta?: Object): any
+  gaugeDelta(name: string, delta: number, meta?: Object): any
+  set(name: string, value: number, meta?: Object): any
+  timing(name: string, value: Date, meta?: Object): any
+  timing(name: string, duration: number, meta?: Object): any
 }
 
 export interface StatsDMetricReporterConfig {
-  mode?: 'udp' | 'tcp';
-  host: string;
-  port: number;
-  prefix?: string;
-  statsdClient?: SDC;
+  mode?: 'udp' | 'tcp'
+  host: string
+  port: number
+  prefix?: string
+  statsdClient?: SDC
 }
 
 export class StatsDMetricReporter implements MetricReporter {

@@ -1,8 +1,9 @@
-import { Decider, Workflow } from 'simple-swf/build/src/entities'
+import { Workflow } from 'simple-swf/build/src/entities'
 import { DecisionTask, EventData } from 'simple-swf/build/src/tasks'
+
+import { BaseDecider } from '../entities'
 import { Config } from '../Config'
-import { Logger } from '../lib/Logger'
-import { ActivityRegistry } from '../entities/activity/ActivityRegistry'
+
 export interface TaskGraphNode {
   type: 'decision' | 'activity'
   handler: string
@@ -49,14 +50,10 @@ interface NodeDetails {
   state: string
 }
 
-export class TaskGraph extends Decider {
-  log: Logger
-  activities: ActivityRegistry
+export default class TaskGraph extends BaseDecider {
   maxRunningWorkflow: number
   constructor(config: Config, workflow: Workflow) {
-    super(workflow)
-    this.log = config.logger
-    this.activities = config.activities
+    super(config, workflow)
     this.maxRunningWorkflow = config.getOpt('maxRunningWorkflow')
   }
   makeDecisions(task: DecisionTask, cb: {(Error?)}): any {
@@ -99,7 +96,7 @@ export class TaskGraph extends Decider {
           startCountByHandler[node.handler]++
           node.env = env
           const handlerActType = this.activities.getModule(node.handler)
-          if (!handlerActType) throw new Error("missing activity type " + node.handler)
+          if (!handlerActType) throw new Error('missing activity type ' + node.handler)
           decisionTask.scheduleTask(node.id, node, handlerActType)
         }
       }
@@ -197,7 +194,7 @@ export class TaskGraph extends Decider {
       // if given the collapse state, automatically add
       if (node.state === 'waiting' || node.state === 'collapse') {
         const depNodes = node.deps.map(nodeDetails)
-        const notDone = depNodes.filter(function (n) { return n.state !== 'completed' && n.state !== 'collapse'; })
+        const notDone = depNodes.filter(function (n) { return n.state !== 'completed' && n.state !== 'collapse' })
         if (notDone.length === 0) {
           if (node.id === graph.sinkNode) {
             haveLastNode = true
@@ -207,7 +204,7 @@ export class TaskGraph extends Decider {
       }
       sources.push.apply(sources, node.deps)
     }
-    return { nodes: _.values(nodes) as TaskGraphNode[], finished: haveLastNode }
+    return { nodes: _.values<TaskGraphNode>(nodes), finished: haveLastNode }
   }
   static getChildren(parameters: TaskGraphParameters): TaskGraphNode[] {
     return _.values(parameters.graph) as TaskGraphNode[]
@@ -217,8 +214,11 @@ export class TaskGraph extends Decider {
     const graph = parameters.graph
     const required = ['nodes', 'edges', 'sourceNode', 'sinkNode']
     for (let key of required) {
-      if (!graph[key]) return "missing " + key + " field in graph"
+      if (!graph[key]) return 'missing ' + key + ' field in graph'
     }
     return null
+  }
+  static getHandlerName() {
+    return 'taskGraph'
   }
 }

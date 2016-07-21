@@ -23,12 +23,13 @@ export class FTLActivity {
     throw new Error('stop must be extended by child class')
   }
   static getHandlerName(): string {
-    throw new Error('must provide getHandlerName function')
+    return ''
   }
   static validateTask(parameters: any): string | null {
     throw new Error('must provide validateTask function')
   }
   static maxConcurrent?: number
+  static version?: string
 }
 export class BaseActivity extends SWFActivity {
   activityClass: typeof FTLActivity

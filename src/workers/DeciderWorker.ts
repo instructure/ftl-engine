@@ -14,7 +14,7 @@ export interface WorkflowWithParent extends SWF.WorkflowExecution {
   parentWorkflowId: string
 }
 
-export class DeciderWorker extends SWFDeciderWorker implements LogWorkerMixin{
+export class DeciderWorker extends SWFDeciderWorker implements LogWorkerMixin {
   ftlConfig: Config
   workerName: string
   logger: Logger
@@ -34,7 +34,7 @@ export class DeciderWorker extends SWFDeciderWorker implements LogWorkerMixin{
   }
   onDecisionMade(task: DecisionTask) {
     this.logInfo('responded to decision task', this.buildTaskMeta(task, { results: task.getDecisionInfo() }))
-    this.emit('decisionCompleted', task.decisions.map(function (d) { return d.decision; }))
+    this.emit('decisionCompleted', task.decisions.map((d) => d.decision ))
   }
   onPoll() {
     this.logInfo('polling for tasks...')
@@ -42,7 +42,7 @@ export class DeciderWorker extends SWFDeciderWorker implements LogWorkerMixin{
   start(cb) {
     super.start((err) => {
       if (err) return cb(err)
-      this.logInfo("stated decider worker")
+      this.logInfo('stated decider worker')
       cb()
     })
   }
@@ -66,3 +66,5 @@ export class DeciderWorker extends SWFDeciderWorker implements LogWorkerMixin{
   logError: (msg: string, err: Error, meta?: Object) => void
   logMeta: (level: LogLevels, msg: string, metaOverrides?: Object) => void
 }
+
+applyMixins(DeciderWorker, [LogWorkerMixin])

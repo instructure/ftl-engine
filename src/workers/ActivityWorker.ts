@@ -10,7 +10,7 @@ import { Config } from '../Config'
 import { Logger, LogWorkerMixin, LogLevels } from '../lib/Logger'
 import { applyMixins } from '../util'
 
-class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin {
+export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin {
   ftlConfig: Config
   workerName: string
   logger: Logger
@@ -91,3 +91,5 @@ class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin {
   logError: (msg: string, err: Error, meta?: Object) => void
   logMeta: (level: LogLevels, msg: string, metaOverrides?: Object) => void
 }
+
+applyMixins(ActivityWorker, [LogWorkerMixin])

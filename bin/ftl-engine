@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+require('source-map-support').install()
+var Cli = require('../').lib.Cli
+
+new Cli().run(function(err) {
+  if (err) throw err
+})
