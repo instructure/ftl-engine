@@ -21,12 +21,12 @@ export abstract class Registry<T extends BaseHandler>  {
   loadLocation(location: string): T[] {
     // handle absolute and relative locations
     if (location.charAt(0) === '.' || location.charAt(0) === '/') {
-      return this.loadFile(location)
+      return this.loadFile(true, location)
     }
     this.config.logger.info(`loading module ${location}`)
     return [this.wrapModule(location, require(location))]
   }
-  loadFile(location: string): T[] {
+  loadFile(loadDirs: boolean, location: string): T[] {
     const stat = fs.statSync(location)
     const ext = path.extname(location)
     if (stat.isFile() && ext !== '.js') return []
@@ -34,10 +34,11 @@ export abstract class Registry<T extends BaseHandler>  {
       this.config.logger.info(`loading file ${location}`)
       return [this.wrapModule(location, require(location))]
     }
-    if (stat.isDirectory()) {
+    if (stat.isDirectory() && loadDirs) {
       this.config.logger.info(`loading directory ${location}`)
       let locations = fs.readdirSync(location).map((l) => path.join(location, l))
-      return _.flatten(locations.map(this.loadFile.bind(this))) as T[]
+      // use this to stop recursion for now
+      return _.flatten(locations.map(this.loadFile.bind(this, false))) as T[]
     }
     return []
   }
