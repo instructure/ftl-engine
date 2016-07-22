@@ -4,3 +4,4 @@ typings/*
 npm_debug
 coverage/
 npm-debug.log
+debug.json

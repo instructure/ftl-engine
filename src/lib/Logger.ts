@@ -1,13 +1,45 @@
-import { Logger as BunyanLogger, createLogger} from 'bunyan'
+import { Logger as BunyanLogger, createLogger, Stream, LoggerOptions} from 'bunyan'
 import { Task } from 'simple-swf/build/src/tasks'
 import * as _ from 'lodash'
 export type LogLevels = 'debug' | 'info' | 'warn' | 'error'
 
+function buildDevOpts(level?: LogLevels): Stream[] | null {
+  try {
+    let PrettyStream = require('bunyan-prettystream')
+    let stream = new PrettyStream()
+    stream.pipe(process.stdout)
+    return [
+      {
+        level: level || 'info',
+        type: 'raw',
+        stream: stream
+      }
+    ]
+  } catch (e) {
+    console.warn('unable to load prettystream')
+    return null
+  }
+}
+export interface LoggerOpts {
+  name: string,
+  devMode?: boolean,
+  level?: LogLevels
+}
 export class Logger {
   logger: BunyanLogger
 
-  constructor(name: string) {
-    this.logger = createLogger({name})
+  constructor(loggerOpts: LoggerOpts ) {
+    const {name, devMode} = loggerOpts
+    if (devMode) {
+      let streams = buildDevOpts(loggerOpts.level)
+      let opts: LoggerOptions = {name}
+      if (streams) {
+        opts.streams = streams
+      }
+      this.logger = createLogger(opts)
+    } else {
+      this.logger = createLogger({name})
+    }
   }
   debug(msg: string, meta?: Object) {
     this.log('debug', msg, meta)
@@ -34,9 +66,6 @@ export class LogWorkerMixin {
   workerName: string
   identity: string
   logger: Logger
-  buildTaskMeta(task: any, meta?: Object) {
-    throw new Error('must override!')
-  }
   logDebug(msg: string, meta?: Object) {
     this.logMeta('debug', msg, meta)
   }
@@ -54,6 +83,7 @@ export class LogWorkerMixin {
       from: this.workerName,
       identity: this.identity,
     }
-    this.logger[level](msg, _.defaults(metaOverrides || {}, baseMeta))
+    let allMeta = _.defaults(metaOverrides || {}, baseMeta)
+    this.logger[level](msg, allMeta)
   }
 }

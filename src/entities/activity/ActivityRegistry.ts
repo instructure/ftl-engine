@@ -10,7 +10,6 @@ export class ActivityRegistry extends Registry<ActivityType> {
     }
     if (typeof handler !== 'function') throw new Error(`activity module ${filename} doesn't export single class function`)
 
-
     let name: string
     if (handler.getHandlerName && handler.getHandlerName()) {
       name = handler.getHandlerName()

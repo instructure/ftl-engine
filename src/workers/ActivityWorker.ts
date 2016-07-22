@@ -4,7 +4,7 @@ import { ActivityWorker as SWFActivityWorker } from 'simple-swf/build/src/worker
 import { ActivityTask } from 'simple-swf/build/src/tasks'
 import { Activity, Workflow } from 'simple-swf/build/src/entities'
 import { ConfigOverride } from 'simple-swf/build/src/SWFConfig'
-import { ActivityStatus, StopReasons } from 'simple-swf/build/src/interfaces'
+import { TaskStatus, StopReasons } from 'simple-swf/build/src/interfaces'
 
 import { Config } from '../Config'
 import { Logger, LogWorkerMixin, LogLevels } from '../lib/Logger'
@@ -45,9 +45,9 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     execution.on('heartbeat', this.onTaskHeartbeat.bind(this, task, execution))
     execution.on('heartbeatComplete', this.onTaskHBComplete.bind(this, task, execution))
   }
-  onFinishedTask(task: ActivityTask, execution: Activity, success: boolean, details: ActivityStatus) {
-    this.logInfo('responded to activity task', { task: { type: task.activityName(), id: execution.id }, success: status })
-    this.logDebug('finished task details', { task: { type: task.activityName(), id: execution.id }, success: status, details: details })
+  onFinishedTask(task: ActivityTask, execution: Activity, success: boolean, details: TaskStatus) {
+    this.logInfo('responded to activity task', { task: { type: task.activityName(), id: execution.id }, success: success })
+    this.logDebug('finished task details', { task: { type: task.activityName(), id: execution.id }, success: success, details: details })
     this.emit('activityCompleted', task, execution, details)
   }
   onWarn(err: Error) {
@@ -56,10 +56,10 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
   onPoll() {
     this.logInfo('polling for tasks...')
   }
-  onTaskCompleted(task: ActivityTask, execution: Activity, details: ActivityStatus) {
+  onTaskCompleted(task: ActivityTask, execution: Activity, details: TaskStatus) {
     this.logInfo('task completed', this.buildTaskMeta(task, { details: details }))
   }
-  onTaskFailed(task: ActivityTask, execution: Activity, err: Error, details: ActivityStatus) {
+  onTaskFailed(task: ActivityTask, execution: Activity, err: Error, details: TaskStatus) {
     this.logInfo('task failed', this.buildTaskMeta(task, { error: err, details: details }))
   }
   onTaskCanceled(task: ActivityTask, execution: Activity, reason: StopReasons) {
@@ -69,9 +69,8 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     this.logInfo('unexpected task error', this.buildTaskMeta(task, { error: err }))
     this.emit('error', err, execution)
   }
-  onTaskHeartbeat(task: ActivityTask, execution: Activity, status: ActivityStatus) {
-    this.logInfo('task heartbeat', this.buildTaskMeta(task, execution))
-    this.logDebug('task heartbeat status', this.buildTaskMeta(task, { status: status }))
+  onTaskHeartbeat(task: ActivityTask, execution: Activity, status: TaskStatus) {
+    this.logInfo('task heartbeat status', this.buildTaskMeta(task, { status: status }))
   }
   onTaskHBComplete(task: ActivityTask, execution: Activity) {
     this.logDebug('task heartbeat finished', this.buildTaskMeta(task))

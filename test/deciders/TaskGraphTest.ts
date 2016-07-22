@@ -111,7 +111,7 @@ describe('taskGraph', () => {
       dt.expects('scheduleTask').once()
       dt.expects('completeWorkflow').never()
 
-      tg.decide(mg, {}, dt.object)
+      tg.decide(mg, dt.object)
       dt.verify()
     })
     it('should call completeWorkflow when finished', function() {
@@ -120,7 +120,7 @@ describe('taskGraph', () => {
       dt.expects('completeWorkflow').once()
       dt.expects('scheduleTask').never()
 
-      tg.decide(mg, {}, dt.object)
+      tg.decide(mg, dt.object)
       dt.verify()
     })
     it('should call recordMarker when receiving a marker task', function() {
@@ -130,7 +130,7 @@ describe('taskGraph', () => {
       dt.expects('completeWorkflow').never()
       dt.expects('scheduleTask').never()
 
-      tg.decide(mg, {}, dt.object)
+      tg.decide(mg, dt.object)
       dt.verify()
     })
     it('should call startChildWorkflow when receiving a task graph task', function() {
@@ -141,7 +141,7 @@ describe('taskGraph', () => {
       dt.expects('completeWorkflow').never()
       dt.expects('scheduleTask').never()
 
-      tg.decide(mg, {}, dt.object)
+      tg.decide(mg, dt.object)
       dt.verify()
     })
     it('should call multiple times for diffent decisions and finish', function() {
@@ -159,7 +159,7 @@ describe('taskGraph', () => {
       dt.expects('completeWorkflow').once()
       dt.expects('scheduleTask').twice()
 
-      tg.decide(mg, {}, dt.object)
+      tg.decide(mg, dt.object)
       dt.verify()
     })
     it('should fail the workflow if we fail to reschedule failed tasks', function() {
@@ -169,7 +169,7 @@ describe('taskGraph', () => {
       dt.expects('failWorkflow').once()
       dt.expects('completeWorkflow').never()
 
-      tg.decide(mg, {}, dt.object)
+      tg.decide(mg, dt.object)
       dt.verify()
 
     })
@@ -180,7 +180,7 @@ describe('taskGraph', () => {
       dt.expects('failWorkflow').once()
       dt.expects('completeWorkflow').never()
 
-      tg.decide(mg, {}, dt.object)
+      tg.decide(mg, dt.object)
       dt.verify()
     })
     it('it should only schedule up to 50 workflows at once', function() {
@@ -197,7 +197,7 @@ describe('taskGraph', () => {
       dt.expects('startChildWorkflow').exactly(50)
       dt.expects('completeWorkflow').never()
 
-      tg.decide(mg, {}, dt.object)
+      tg.decide(mg, dt.object)
       dt.verify()
     })
   })
@@ -730,7 +730,7 @@ describe('taskGraph', () => {
     let {dt, input, tg} = buildNextMock(nodes, sandbox, multiModule)
     let graph = input.graph
     let grouped = dt.getGroupedEvents()
-    it.only('should throttle if we have more activities running concurrently', () => {
+    it('should throttle if we have more activities running concurrently', () => {
       let nextNodes = tg.getNextNodes(graph, grouped)
       assert.equal(nextNodes.nodes.length, 5)
       let startOfType = {oneLimit: 0, twoLimit: 0, noLimit: 0}

@@ -7,15 +7,15 @@ import * as _ from 'lodash'
 
 import { Config } from '../Config'
 import { ActivityWorker, DeciderWorker } from '../workers'
-import { registration } from '../init'
+import { registration, InitedEntities } from '../init'
 import { validator } from './validator'
 import { Processor, genUtil, MetadataStore } from '../generator'
 import { StringToStream } from './StringToStream'
 
 export class Cli {
   config: Config
-  activityWorker: ActivityWorker
-  deciderWorker: DeciderWorker
+  activityWorker?: ActivityWorker
+  deciderWorker?: DeciderWorker
   cli: yargs.Argv
   constructor() {
   }
@@ -74,13 +74,16 @@ export class Cli {
     return this.cli
   }
   submit(cb: {(Error?)}, args: any) {
-    this.init(args.config, (err, config, workflow, domain, actWorker, decWorker) => {
+    this.init(args.config, (err, entities) => {
       if (err) return cb(err)
-      const inputFile = args._[0]
+      const inputFile = args.input
+      let {config, workflow} = entities!
 
-      let source = path.join(path.resolve(process.cwd(), inputFile))
+      let source: string | null = null
       if (inputFile === '-') {
         source = '/dev/stdin'
+      } else {
+        source = path.join(path.resolve(process.cwd(), inputFile))
       }
 
       let workInput: any | null = null
@@ -99,8 +102,9 @@ export class Cli {
         config.logger.error(failureReason)
         return cb(new Error('invalid job'))
       }
+      let initialEnv = workInput.env || {}
 
-      workflow.startWorkflow(workInput.id, workInput, {}, (err, info) => {
+      workflow.startWorkflow(workInput.id, workInput, initialEnv, {}, (err, info) => {
         if (err) return cb(err)
         config.logger.info(info)
         cb()
@@ -113,20 +117,20 @@ export class Cli {
       this.cli.showHelp()
       return cb()
     }
-    this.init(args.config, (err, workflow, domain, actWorker, decWorker) => {
+    this.init(args.config, (err, entities) => {
       if (err) return cb(err)
       this.startWorkers(args, cb)
     })
   }
-  init(configFile: string, cb: {(Error?, Config?, Workflow?, Domain?, ActivityWorker?, DeciderWorker?)}) {
+  init(configFile: string, cb: {(err: Error | null, entities?: InitedEntities )}) {
     const configFunc = require(path.join(process.cwd(), configFile))
     const config = new Config(configFunc)
     this.config = config
-    registration.init(config, (err, workflow, domain, actWorker, decWorker) => {
+    registration.init(config, (err, entities) => {
       if (err) return cb(err)
-      this.activityWorker = actWorker
-      this.deciderWorker = decWorker
-      cb(null, config, workflow, domain, actWorker, decWorker)
+      this.activityWorker = entities!.activityWorker
+      this.deciderWorker = entities!.deciderWorker
+      cb(null, entities)
     })
   }
   startWorkers(args: any, cb: {(Error?)}) {
@@ -169,6 +173,7 @@ export class Cli {
   }
   startActivityWorker(shouldStart: boolean, cb: {(err: Error | null, s: boolean)}) {
     if (!shouldStart) return cb(null, false)
+    if (!this.activityWorker) return cb(new Error('init not called'), false)
     this.activityWorker.start((err) => {
       if (err) return cb(err, false)
       this.config.logger.info('started activity worker')
@@ -177,6 +182,7 @@ export class Cli {
   }
   startDeciderWorker(shouldStart: boolean, cb: {(err: Error | null, s: boolean)}) {
     if (!shouldStart) return cb(null, false)
+    if (!this.deciderWorker) return cb(new Error('init not called'), false)
     this.deciderWorker.start((err) => {
       if (err) return cb(err, false)
       this.config.logger.info('started decider worker')

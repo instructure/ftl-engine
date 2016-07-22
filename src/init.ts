@@ -3,6 +3,13 @@ import * as _ from 'lodash'
 import { Workflow, Domain } from 'simple-swf/build/src/entities'
 import { ActivityWorker, DeciderWorker } from './workers'
 import { Config } from './Config'
+export interface InitedEntities {
+  domain: Domain,
+  workflow: Workflow,
+  activityWorker: ActivityWorker,
+  deciderWorker: DeciderWorker,
+  config: Config
+}
 let registration = {
   registerDomain(config: Config, cb: {(Error?, Domain?)}) {
     config.domain.ensureDomain(config.getConfigFor('domain'), (err, created) => {
@@ -19,16 +26,16 @@ let registration = {
       cb(null, workflow)
     })
   },
-  init(config: Config, cb: {(Error?, Workflow?, Domain?, ActivityWorker?, DeciderWorker?)}) {
-    if (haveRegistered) return cb()
+  init(config: Config, cb: {(err: Error | null, entities?: InitedEntities)}) {
+    if (haveRegistered) return cb(null)
     registration.registerDomain(config, (err, domain) => {
       if (err) return cb(err)
       registration.registerWorkflowType(config, domain, (err, workflow) => {
         if (err) return cb(err)
         haveRegistered = true
-        const actWorker = registration.initActivityWorker(config, workflow)
-        const decWorker = registration.initDeciderWorker(config, workflow)
-        cb(null, workflow, domain, actWorker, decWorker)
+        const activityWorker = registration.initActivityWorker(config, workflow)
+        const deciderWorker = registration.initDeciderWorker(config, workflow)
+        cb(null, {workflow, domain, activityWorker, deciderWorker, config})
       })
     })
   },

@@ -146,10 +146,16 @@ export class Processor implements IProcessor {
     return `${name}_${shortId.generate()}`
   }
   requireLocal(classPath: string): any {
+    let newMod: any = null
     if (path.isAbsolute(classPath)) {
-      return require(classPath)
+      newMod = require(classPath)
     } else {
-      return require('./' + classPath)
+      newMod = require('./' + classPath)
+    }
+    if (newMod.default) {
+      return newMod.default
+    } else {
+      return newMod
     }
   }
   processFile(args: any, file: string, cb: {(err: Error | null, node: TaskGraphNode | null)}) {

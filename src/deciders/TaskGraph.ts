@@ -12,7 +12,6 @@ export interface TaskGraphNode {
   name: string
   sourceFile: string
   sourceDir: string
-  env?: any
   parameters: any
 }
 export interface TaskGraphGraph {
@@ -66,14 +65,12 @@ export default class TaskGraph extends BaseDecider {
     const input = task.getWorkflowInput()
     if (input.handler !== 'taskGraph') return cb(new Error('invalid handler for taskGrah'))
     const parameters = input.parameters
-    let env = input.env || {}
-    this.decide(parameters, env, task)
+    this.decide(parameters, task)
     cb()
   }
-  decide(parameters: TaskGraphParameters, env: any, decisionTask: DecisionTask) {
+  decide(parameters: TaskGraphParameters, decisionTask: DecisionTask) {
     const graph = parameters.graph
     const groupedEvents = decisionTask.getGroupedEvents()
-    env = this.getNewEnv(env, groupedEvents)
     let next = this.getNextNodes(graph, groupedEvents)
     let startCountByHandler = {}
     let startCountSubWorkflows = 0
@@ -83,7 +80,6 @@ export default class TaskGraph extends BaseDecider {
         if (node.handler === 'taskGraph') {
           const shouldThrottle = this.throttleWorkflows(node, graph, groupedEvents, startCountSubWorkflows)
           if (!shouldThrottle) {
-            node.env = env
             startCountSubWorkflows++
             decisionTask.startChildWorkflow(node.id, node)
           }
@@ -100,7 +96,6 @@ export default class TaskGraph extends BaseDecider {
         if (!shouldThrottle) {
           startCountByHandler[node.handler] = startCountByHandler[node.handler] || 0
           startCountByHandler[node.handler]++
-          node.env = env
           const handlerActType = this.activities.getModule(node.handler)
           if (!handlerActType) throw new Error('missing activity type ' + node.handler)
           decisionTask.scheduleTask(node.id, node, handlerActType)
@@ -116,7 +111,7 @@ export default class TaskGraph extends BaseDecider {
     }
     else if (next.finished) {
       // TODO: better results
-      decisionTask.completeWorkflow({ result: 'success', env: env })
+      decisionTask.completeWorkflow({status: 'success'})
     }
 
   }
@@ -161,15 +156,6 @@ export default class TaskGraph extends BaseDecider {
     if ((curRunningWorkflows + startCountSubWorkflows) >= maxRunningWorkflow) return true
     return false
   }
-  getNewEnv(currentEnv: any, grouped: EventData) {
-    if (!grouped.completed) return currentEnv
-    for (let event of grouped.completed) {
-      if (event.result && event.result.env && typeof event.result.env === 'object') {
-        currentEnv = _.merge(currentEnv, event.result.env)
-      }
-    }
-    return currentEnv
-  }
   getNodeDetails(graph: TaskGraphGraph, grouped: EventData, name: string): NodeDetails {
     const node = graph.nodes[name]
     let type: string
@@ -213,7 +199,7 @@ export default class TaskGraph extends BaseDecider {
     return { nodes: _.values<TaskGraphNode>(nodes), finished: haveLastNode }
   }
   static getChildren(parameters: TaskGraphParameters): TaskGraphNode[] {
-    return _.values(parameters.graph) as TaskGraphNode[]
+    return _.values(parameters.graph.nodes) as TaskGraphNode[]
   }
   static validateTask(parameters: any): string | null {
     if (!parameters.graph) return 'missing "graph" field in parameters'

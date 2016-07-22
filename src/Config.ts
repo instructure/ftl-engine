@@ -54,7 +54,7 @@ export class Config {
   }
   buildLoggerInstance(loggerConfig: any): Logger {
     this.checkRequired('logger', {name: 'string'}, loggerConfig)
-    return new Logger(loggerConfig.name)
+    return new Logger(loggerConfig)
   }
   buildMetricInstance(metricConfig: any): MetricReporter {
     this.checkRequired('metrics', {host: 'string', port: 'number'}, metricConfig)
@@ -115,7 +115,7 @@ export class Config {
   }
   swfDefaults = {
     activity: {
-      heartbeatTimeout: 60,
+      heartbeatTimeout: 60 * 1000,
       taskList: 'ftl-engine'
     },
     workflow: {

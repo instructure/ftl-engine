@@ -1,10 +1,11 @@
 import { Activity as SWFActivity, ActivityType, Workflow } from 'simple-swf/build/src/entities'
+import { TaskStatus } from 'simple-swf/build/src/interfaces'
 import { ActivityTask } from 'simple-swf/build/src/tasks'
 import { StopReasons } from 'simple-swf/build/src/interfaces'
 
 import { Config } from '../../Config'
 export interface FTLRunCallabck {
-  (Error?: any, any?: any, Object?: any): any;
+  (err: Error | null, status?: any, env?: any): any
 }
 // we make this nicer for non-TS implementors by throwing erros instead
 // of using an abstract class
@@ -29,6 +30,7 @@ export class FTLActivity {
   static maxConcurrent?: number
   static version?: string
 }
+
 export class BaseActivity extends SWFActivity {
   activityClass: typeof FTLActivity
   config: Config
@@ -45,9 +47,21 @@ export class BaseActivity extends SWFActivity {
     this.activityClass = activityClass
     this.config = config
   }
-  run(input: any, cb: FTLRunCallabck) {
-    this.activity = new this.activityClass(input.parameters, input.env || {}, this.config)
-    this.activity.run(cb)
+  run(input: any, env: any, cb: {(err: Error | null, status: TaskStatus)}) {
+    this.activity = new this.activityClass(input.parameters, env || {}, this.config)
+    this.activity.run((err, status, env) => {
+      if (err) return cb(err, {status: 'failure'})
+      let info: any = null
+      let textStatus: string
+      if (typeof status === 'string') {
+        textStatus = status
+
+      } else {
+        textStatus = 'success'
+        info = status
+      }
+      cb(null, {status: textStatus, info, env})
+    })
   }
   status(): any {
     return this.activity.status()
