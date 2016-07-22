@@ -126,6 +126,6 @@ export class Config {
     }
   }
   ftlDefaults = {
-    maxRunningWorkflow: 20
+    maxRunningWorkflow: 50
   }
 }

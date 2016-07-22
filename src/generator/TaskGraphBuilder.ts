@@ -60,7 +60,7 @@ export class TaskGraphBuilder {
     // find nodes with no deps and attack to sink
     let sinkEdges: string[] = []
     if (!this.graph.revEdges) throw new Error('unexpected, revEdges not computed')
-    for(let taskId in this.graph.revEdges) {
+    for (let taskId in this.graph.revEdges) {
       if (this.graph.revEdges[taskId].length === 0) {
         this.graph.revEdges[taskId] = [this.sinkTask.id]
         sinkEdges.push(taskId)

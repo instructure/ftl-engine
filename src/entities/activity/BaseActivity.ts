@@ -9,9 +9,7 @@ export interface FTLRunCallabck {
 // we make this nicer for non-TS implementors by throwing erros instead
 // of using an abstract class
 export class FTLActivity {
-  config: Config
-  constructor(parameters: any, env: any, config: Config) {
-    this.config = config
+  constructor(parameters: any, env?: any, config?: Config) {
   }
   run(cb: FTLRunCallabck) {
     throw new Error('run must be extended by child class')

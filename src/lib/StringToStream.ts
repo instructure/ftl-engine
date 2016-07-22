@@ -6,7 +6,7 @@ export class StringToStream extends Readable {
     super()
   }
   _read(size: number) {
-    if(!this.ended) {
+    if (!this.ended) {
       process.nextTick(() => {
         this.push(new Buffer(this.str))
         this.push(null)

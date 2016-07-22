@@ -1,5 +1,6 @@
 import { Workflow } from 'simple-swf/build/src/entities'
 import { DecisionTask, EventData } from 'simple-swf/build/src/tasks'
+import * as _ from 'lodash'
 
 import { BaseDecider } from '../entities'
 import { Config } from '../Config'
@@ -46,7 +47,7 @@ function isTaskGraphGraphNode(node: AllNodeTypes): node is TaskGraphGraphNode {
 function isTaskGraphMarkerNode(node: AllNodeTypes): node is TaskGraphMarkerNode {
   return node.type === 'decision' && node.handler === 'recordMarker'
 }
-interface NodeDetails {
+export interface NodeDetails {
   id: string,
   node: TaskGraphNode,
   type: string,
@@ -58,7 +59,8 @@ export default class TaskGraph extends BaseDecider {
   maxRunningWorkflow: number
   constructor(config: Config, workflow: Workflow) {
     super(config, workflow)
-    this.maxRunningWorkflow = config.getOpt('maxRunningWorkflow')
+    this.maxRunningWorkflow = config.getOpt('maxRunningWorkflow') as number
+    if (!this.maxRunningWorkflow) throw new Error('missing maxRunningWorkflow')
   }
   makeDecisions(task: DecisionTask, cb: {(Error?)}): any {
     const input = task.getWorkflowInput()
@@ -70,7 +72,7 @@ export default class TaskGraph extends BaseDecider {
   }
   decide(parameters: TaskGraphParameters, env: any, decisionTask: DecisionTask) {
     const graph = parameters.graph
-    const groupedEvents = decisionTask.rollup.data
+    const groupedEvents = decisionTask.getGroupedEvents()
     env = this.getNewEnv(env, groupedEvents)
     let next = this.getNextNodes(graph, groupedEvents)
     let startCountByHandler = {}
@@ -79,7 +81,7 @@ export default class TaskGraph extends BaseDecider {
       if (node.type === 'decision') {
         // TODO: somehow hand off to a child? need to make this more generic but just hard code for now...
         if (node.handler === 'taskGraph') {
-          var shouldThrottle = this.throttleWorkflows(node, graph, groupedEvents, startCountSubWorkflows)
+          const shouldThrottle = this.throttleWorkflows(node, graph, groupedEvents, startCountSubWorkflows)
           if (!shouldThrottle) {
             node.env = env
             startCountSubWorkflows++
@@ -90,7 +92,7 @@ export default class TaskGraph extends BaseDecider {
           decisionTask.addMarker(node.id, node.parameters.status)
         }
         else {
-          console.warn('couldn\'t find hander for child node', node)
+          this.logger.warn('couldn\'t find hander for child node', node)
         }
       }
       else {
@@ -109,7 +111,7 @@ export default class TaskGraph extends BaseDecider {
     const failedToReTimeOut = decisionTask.rescheduleTimedOutEvents()
     const failedToReschedule = failedToReFail.concat(failedToReTimeOut)
     if (failedToReschedule.length > 0) {
-      console.error('failed to reschedule all previously failed events')
+      this.logger.warn('failed to reschedule all previously failed events')
       decisionTask.failWorkflow('failed to reschedule previously failed events', JSON.stringify(failedToReschedule).slice(0, 250))
     }
     else if (next.finished) {
@@ -159,7 +161,7 @@ export default class TaskGraph extends BaseDecider {
     if ((curRunningWorkflows + startCountSubWorkflows) >= maxRunningWorkflow) return true
     return false
   }
-  private getNewEnv(currentEnv: any, grouped: EventData) {
+  getNewEnv(currentEnv: any, grouped: EventData) {
     if (!grouped.completed) return currentEnv
     for (let event of grouped.completed) {
       if (event.result && event.result.env && typeof event.result.env === 'object') {
@@ -168,7 +170,7 @@ export default class TaskGraph extends BaseDecider {
     }
     return currentEnv
   }
-  private getNodeDetails(graph: TaskGraphGraph, grouped: EventData, name: string): NodeDetails {
+  getNodeDetails(graph: TaskGraphGraph, grouped: EventData, name: string): NodeDetails {
     const node = graph.nodes[name]
     let type: string
     let state: string
@@ -185,7 +187,7 @@ export default class TaskGraph extends BaseDecider {
     const deps = graph.edges[name] || []
     return { id: node.id, node, type: type, deps: deps, state: state }
   }
-  private getNextNodes(graph, grouped): {nodes: TaskGraphNode[], finished: boolean} {
+  getNextNodes(graph, grouped): {nodes: TaskGraphNode[], finished: boolean} {
     const nodeDetails = this.getNodeDetails.bind(this, graph, grouped)
     let node = nodeDetails(graph.sinkNode)
     if (node.state === 'completed') return { nodes: [], finished: true }

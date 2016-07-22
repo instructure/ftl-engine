@@ -16,7 +16,7 @@ export default class Script extends FTLActivity {
   cbCalled: boolean
   alreadyKilled: boolean
   forceKillTimeout: NodeJS.Timer
-  constructor(params: any, env: any, config: Config) {
+  constructor(params: any, env?: any, config?: Config) {
     super(params, env, config)
     this.script = params.script
     this.scriptUrl = params.scriptUrl
@@ -25,21 +25,21 @@ export default class Script extends FTLActivity {
     this.args = params.args || ['-c']
     this.s3 = new S3()
   }
-  run(cb: {(Error?)}) {
+  run(cb: {(err: Error | null, res: any)}) {
     if (this.scriptUrl && this.bucket) {
       this.runS3Script(cb)
     } else {
       this.runScript(this.script, cb)
     }
   }
-  runS3Script(cb) {
+  runS3Script(cb: {(err: Error | null, res: any)}) {
     this.s3.getObject({Bucket: this.bucket!, Key: this.scriptUrl!}, (err, resp) => {
-      if (err) return cb(err)
+      if (err) return cb(err, null)
       const script = resp.Body.toString('utf8')
       this.runScript(script, cb)
     })
   }
-  runScript(script, cb) {
+  runScript(script: string, cb: {(err: Error | null, res: any)}) {
     const args = this.args.concat([script.trim()])
     const scr = this.scr = spawn(this.command, args)
     let output = {
@@ -59,7 +59,7 @@ export default class Script extends FTLActivity {
       if (this.stopped) return
       if (this.cbCalled) return
       this.cbCalled = true
-      return cb(err)
+      return cb(err, null)
     })
     scr.on('exit', (exitCode, signal) => {
       if (this.stopped) return
@@ -69,7 +69,7 @@ export default class Script extends FTLActivity {
       cb(null, this.truncateOutput(output))
     })
   }
-  truncateOutput(output) {
+  truncateOutput(output: {stdout: string, stderr: string}): {stdout: string, stderr: string} {
     if ((output.stdout.length + output.stderr.length) < MAX_LENGTH) {
       return output
     }

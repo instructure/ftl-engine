@@ -166,7 +166,7 @@ export class Processor implements IProcessor {
           if (!taskDef) return process.nextTick(() => cb(null, null))
           const task = this.wrapTask(args, file, taskDef, taskBuilder)
           return process.nextTick(() => cb(null, task))
-        } catch(e) {
+        } catch (e) {
           throw e
         }
       } else {
