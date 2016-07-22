@@ -80,7 +80,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
       task: { type: task.activityName(), id: task.id },
       workflow: task.getWorkflowInfo()
     }
-    return _.defaults(meta || {}, meta || {})
+    return _.defaults(taskMeta || {}, meta || {})
   }
   // LogWorkerMixin
   identity: string

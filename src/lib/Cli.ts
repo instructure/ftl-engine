@@ -4,6 +4,7 @@ import { Readable } from 'stream'
 
 import * as yargs from 'yargs'
 import * as _ from 'lodash'
+import * as shortId from 'shortid'
 
 import { Config } from '../Config'
 import { ActivityWorker, DeciderWorker } from '../workers'
@@ -29,6 +30,11 @@ export class Cli {
         describe: 'js config module to load',
         demand: true,
         string: true
+      }).option('id', {
+        alias: 'i',
+        describe: 'the unique id of the workflow',
+        string: true,
+        default: shortId.generate()
       }) as any
     }, this.submit.bind(this, cb))
     .command('start', 'start ftl-engine with specified components', (yargs) => {
@@ -104,7 +110,7 @@ export class Cli {
       }
       let initialEnv = workInput.env || {}
 
-      workflow.startWorkflow(workInput.id, workInput, initialEnv, {}, (err, info) => {
+      workflow.startWorkflow(args.id, workInput, initialEnv, {}, (err, info) => {
         if (err) return cb(err)
         config.logger.info(info)
         cb()

@@ -56,7 +56,7 @@ export class DeciderWorker extends SWFDeciderWorker implements LogWorkerMixin {
       task: { type: 'taskGraph', id: task.id },
       workflow: wfMeta
     }
-    return _.defaults(meta || {}, meta || {})
+    return _.defaults(taskMeta || {}, meta || {})
   }
   // LogWorkerMixin
   identity: string
