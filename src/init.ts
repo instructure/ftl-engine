@@ -12,7 +12,7 @@ export interface InitedEntities {
 }
 let registration = {
   registerDomain(config: Config, cb: {(Error?, Domain?)}) {
-    config.domain.ensureDomain(config.getConfigFor('domain'), (err, created) => {
+    config.domain.ensureDomain(config.getConfigFor('swf.domain'), (err, created) => {
       if (err) return cb(err)
       config.logger.info(`domain  ${config.domain.name} ${created ? 'was created' : 'already exists'}`)
       cb(null, config.domain)
@@ -20,7 +20,7 @@ let registration = {
   },
   registerWorkflowType(config: Config, domain: Domain, cb: {(Error?, Workflow?)}) {
     let workflow = new Workflow(domain, config.workflowName, config.defaultVersion, config.fieldSerializer)
-    workflow.ensureWorkflow(config.getConfigFor('workflow'), (err, created) => {
+    workflow.ensureWorkflow(config.getConfigFor('swf.workflow'), (err, created) => {
       if (err) return cb(err)
       config.logger.info(`workflow ${workflow.name} ${created ? 'was created' : 'already exists'}`)
       cb(null, workflow)
@@ -40,7 +40,7 @@ let registration = {
     })
   },
   initActivityWorker(config: Config, workflow: Workflow) {
-    let worker = new ActivityWorker(workflow, config, config.getConfigFor('activityWorker'))
+    let worker = new ActivityWorker(workflow, config, config.getConfigFor('swf.activityWorker'))
     config.activities.getModules().map((actType) => worker.registerActivityType(actType))
     return worker
   },
@@ -48,7 +48,7 @@ let registration = {
     let TaskGraph = config.deciders.getModule('taskGraph')
     if (!TaskGraph) throw new Error('missing taskGraph plugin...')
     let taskGraphDecider = new TaskGraph(config, workflow)
-    return new DeciderWorker(taskGraphDecider, config, config.getConfigFor('deciderWorker'))
+    return new DeciderWorker(taskGraphDecider, config, config.getConfigFor('swf.deciderWorker'))
   }
 }
 export {registration}

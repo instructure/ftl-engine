@@ -1,0 +1,5 @@
+node_modules
+.git/
+build
+db_data
+private-env

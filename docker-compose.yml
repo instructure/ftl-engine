@@ -1,0 +1,42 @@
+version: "2"
+services:
+  app:
+    build: .
+    links:
+      - sns:sns
+      - s3:s3
+      - statsd:statsd
+    environment:
+      NODE_ENV: development
+      # blank means inject in from my env
+      AWS_ACCESS_KEY_ID:
+      AWS_SECRET_ACCESS_KEY:
+      AWS_REGION: 'us-east-1'
+    command: ./bin/ftl-engine -c build/test_integration/config.js start
+
+  sns:
+    image: feathj/fake-sns
+    ports:
+      - "9292:9292"
+    environment:
+      VIRTUAL_HOST: "sns.docker"
+
+  s3:
+    image: lphoward/fake-s3
+    ports:
+      - "4569:4569"
+    environment:
+      VIRTUAL_HOST: "s3.docker"
+
+
+  statsd:
+    image: hopsoft/graphite-statsd
+    ports:
+      - "8181:80"
+      - "2003-2004:2003-2004"
+      - "2023-2024:2023-2024"
+      - "8125:8125/udp"
+      - "8126:8126"
+    environment:
+      VIRTUAL_HOST: "statsd.docker"
+      VIRTUAL_PORT: "80"

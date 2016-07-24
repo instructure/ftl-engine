@@ -1,7 +1,8 @@
+import { EventEmitter } from 'events'
 import SDC = require('statsd-client')
 import { Config } from '../Config'
 
-export interface MetricReporter {
+export interface MetricReporter extends EventEmitter {
   increment(name: string, count?: number, meta?: Object): any
   decrement(name: string, count?: number, meta?: Object): any
   counter(name: string, count: number, meta?: Object): any
@@ -20,10 +21,11 @@ export interface StatsDMetricReporterConfig {
   statsdClient?: SDC
 }
 
-export class StatsDMetricReporter implements MetricReporter {
+export class StatsDMetricReporter extends EventEmitter implements MetricReporter {
   client: SDC
   config: StatsDMetricReporterConfig
   constructor(config: StatsDMetricReporterConfig) {
+    super()
     this.config = config
     this.client = config.statsdClient || new SDC(config)
   }

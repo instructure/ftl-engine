@@ -18,6 +18,7 @@ export class DeciderWorker extends SWFDeciderWorker implements LogWorkerMixin {
   ftlConfig: Config
   workerName: string
   logger: Logger
+  decisionTimers: {[id: string]: Date}
   constructor(decider: Decider, config: Config, opts: ConfigOverride) {
     super(decider, opts)
     this.ftlConfig = config
@@ -26,17 +27,25 @@ export class DeciderWorker extends SWFDeciderWorker implements LogWorkerMixin {
     this.on('decision', this.onDecision.bind(this))
     this.on('madeDecision', this.onDecisionMade.bind(this))
     this.on('poll', this.onPoll.bind(this))
+    this.decisionTimers = {}
   }
   onDecision(task: DecisionTask) {
+    this.decisionTimers[task.id] = new Date()
+    this.ftlConfig.metricReporter.increment('decider.running')
     this.logInfo('received decision task', this.buildTaskMeta(task))
     this.logDebug('decision task', this.buildTaskMeta(task, { rawTask: task.rawTask }))
-
   }
   onDecisionMade(task: DecisionTask) {
+    const finishTime = this.decisionTimers[task.id]
+    delete this.decisionTimers[task.id]
+    this.ftlConfig.metricReporter.decrement('decider.running')
+    this.ftlConfig.metricReporter.increment('decider.completed')
+    this.ftlConfig.metricReporter.timing('decider.timer', finishTime)
     this.logInfo('responded to decision task', this.buildTaskMeta(task, { results: task.getDecisionInfo() }))
     this.emit('decisionCompleted', task.decisions.map((d) => d.decision ))
   }
   onPoll() {
+    this.ftlConfig.metricReporter.increment('decider.pollCompleted')
     this.logInfo('polling for tasks...')
   }
   start(cb) {

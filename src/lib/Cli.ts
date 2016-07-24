@@ -20,6 +20,13 @@ export class Cli {
   cli: yargs.Argv
   constructor() {
   }
+  printStack(cli, msg, err) {
+    cli.showHelp()
+    console.error(msg)
+    if (process.env.YARGS_DEBUG) {
+      console.error(err.stack)
+    }
+  }
   run(cb: {(Error?)}): yargs.Argv {
     this.cli = yargs
     .usage('Usage: $0 -c <jsConf> <command> [args...]')
@@ -35,7 +42,7 @@ export class Cli {
         describe: 'the unique id of the workflow',
         string: true,
         default: shortId.generate()
-      }) as any
+      }).fail(this.printStack.bind(this, yargs)) as any
     }, this.submit.bind(this, cb))
     .command('start', 'start ftl-engine with specified components', (yargs) => {
       return yargs.reset().option('config', {
@@ -53,7 +60,7 @@ export class Cli {
         description: 'start the decider worker',
         default: true,
         boolean: true,
-      }) as any
+      }).fail(this.printStack.bind(this, yargs)) as any
     }, this.start.bind(this, cb))
     .command('generate <directory>', 'generate an ftl task from the directory', (yargs) => {
       return yargs.reset().option('data', {
@@ -74,7 +81,7 @@ export class Cli {
         string: true,
         default: '-',
         normalize: true
-      }) as any
+      }).fail(this.printStack.bind(this, yargs)) as any
     }, this.generate.bind(this, cb))
     this.cli.argv
     return this.cli
@@ -146,8 +153,13 @@ export class Cli {
     }
     let cbCalled = false
     function toStop(worker: ActivityWorker | DeciderWorker, name: 'activity' | 'decider', cb: {(Error?)}) {
-      worker.on('error', (err) => {
-        this.config.logger.error(`error from ${name} worker`, err)
+      worker.on('error', (err: Error, execution?: any) => {
+        let withExecution = execution ? ` with execution ${execution.id}` : ''
+        this.config.logger.fatal(`error from ${name} worker${withExecution}`, {err, execution})
+        this.config.notifier.sendError('workerError', {workerName: name, err}, (err) => {
+          if (err) this.config.logger.fatal('unable to send notifier alert!', {err})
+          return cb(err)
+        })
       })
       process.on('SIGINT', () => {
         worker.stop((err) => {

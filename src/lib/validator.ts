@@ -19,11 +19,13 @@ const validator = {
       let handler: BaseHandler | null = null
       if (toCheck.type === 'decision') {
         handler = config.deciders.getModule(toCheck.handler)
-      } else {
+      } else if (toCheck.type === 'activity') {
         let actType = config.activities.getModule(toCheck.handler)
         if (actType) {
           handler = actType.ActivityHandler
         }
+      } else {
+        return `task id: ${toCheck.id}, name: ${toCheck.name} gave an invalid type`
       }
       if (!handler) return `${toCheck.type || 'activity'} node name: ${toCheck.name},
        id: ${toCheck.id} did not define a known handler, gave ${toCheck.handler}`

@@ -1,7 +1,8 @@
+import { EventEmitter } from 'events'
 import { Logger as BunyanLogger, createLogger, Stream, LoggerOptions} from 'bunyan'
 import { Task } from 'simple-swf/build/src/tasks'
 import * as _ from 'lodash'
-export type LogLevels = 'debug' | 'info' | 'warn' | 'error'
+export type LogLevels = 'debug' | 'info' | 'warn' | 'error' | 'fatal'
 
 function buildDevOpts(level?: LogLevels): Stream[] | null {
   try {
@@ -25,10 +26,11 @@ export interface LoggerOpts {
   devMode?: boolean,
   level?: LogLevels
 }
-export class Logger {
+export class Logger extends EventEmitter {
   logger: BunyanLogger
 
   constructor(loggerOpts: LoggerOpts ) {
+    super()
     const {name, devMode} = loggerOpts
     if (devMode) {
       let streams = buildDevOpts(loggerOpts.level)
@@ -52,6 +54,9 @@ export class Logger {
   }
   error(msg: string, meta?: Object) {
     this.log('error', msg, meta)
+  }
+  fatal(msg: string, meta?: Object) {
+    this.log('fatal', msg, meta)
   }
   log(level: LogLevels, msg: string, meta?: Object) {
     if (meta) {

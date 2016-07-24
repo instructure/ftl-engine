@@ -9,7 +9,7 @@ export class ActivityType extends SWFActivtyType implements BaseHandler {
   config: Config
   constructor(HandlerClass: typeof FTLActivity, loadLocation: string, config: Config) {
     const version = HandlerClass.version || config.defaultVersion
-    const maxRetry = config.maxRetry
+    const maxRetry = config.getOpt('maxRetry')
     super(HandlerClass.getHandlerName(), version, BaseActivity, { maxRetry: maxRetry })
     this.ActivityHandler = HandlerClass
     this.config = config

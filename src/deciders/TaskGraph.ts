@@ -1,4 +1,5 @@
 import { Workflow } from 'simple-swf/build/src/entities'
+import { ConfigOverride } from 'simple-swf/build/src/SWFConfig'
 import { DecisionTask, EventData } from 'simple-swf/build/src/tasks'
 import * as _ from 'lodash'
 
@@ -13,7 +14,19 @@ export interface TaskGraphNode {
   sourceFile: string
   sourceDir: string
   parameters: any
+  maxRetry?: number
 }
+
+export interface TaskGraphActivityNode extends TaskGraphNode {
+  opts?: {
+    taskList?: string,
+    taskPriority?: number,
+    scheduleToCloseTimeout?: number,
+    scheduleToStartTimeout?: number
+    startToCloseTimeout?: number
+  }
+}
+
 export interface TaskGraphGraph {
   nodes: {
     [name: string]: TaskGraphNode
@@ -27,12 +40,12 @@ export interface TaskGraphGraph {
   sourceNode: string
   sinkNode: string
 }
+
 export interface TaskGraphParameters {
   graph: TaskGraphGraph
 }
 export interface TaskGraphGraphNode extends TaskGraphNode {
   parameters: TaskGraphParameters,
-  maxRetry?: number
 }
 export interface TaskGraphMarkerNode extends TaskGraphNode {
   parameters: {
@@ -78,10 +91,12 @@ export default class TaskGraph extends BaseDecider {
       if (node.type === 'decision') {
         // TODO: somehow hand off to a child? need to make this more generic but just hard code for now...
         if (node.handler === 'taskGraph') {
-          const shouldThrottle = this.throttleWorkflows(node, graph, groupedEvents, startCountSubWorkflows)
+          let tgNode = node as TaskGraphGraphNode
+          const shouldThrottle = this.throttleWorkflows(tgNode, graph, groupedEvents, startCountSubWorkflows)
           if (!shouldThrottle) {
             startCountSubWorkflows++
-            decisionTask.startChildWorkflow(node.id, node)
+            const maxRetry = tgNode.maxRetry || this.ftlConfig.getOpt('maxRetry')
+            decisionTask.startChildWorkflow(tgNode.id, tgNode, {maxRetry: maxRetry})
           }
         }
         else if (node.handler === 'recordMarker') {
@@ -98,7 +113,9 @@ export default class TaskGraph extends BaseDecider {
           startCountByHandler[node.handler]++
           const handlerActType = this.activities.getModule(node.handler)
           if (!handlerActType) throw new Error('missing activity type ' + node.handler)
-          decisionTask.scheduleTask(node.id, node, handlerActType)
+          let opts = this.buildOpts(node)
+          opts['maxRetry'] = node.maxRetry || this.ftlConfig.getOpt('maxRetry')
+          decisionTask.scheduleTask(node.id, node, handlerActType, opts)
         }
       }
     }
@@ -114,6 +131,19 @@ export default class TaskGraph extends BaseDecider {
       decisionTask.completeWorkflow({status: 'success'})
     }
 
+  }
+  buildOpts(node: TaskGraphActivityNode): ConfigOverride {
+    if (node.opts) {
+      let opts = node.opts as any
+      if (opts.taskList) {
+        opts.taskList = {
+          name: opts.taskList
+        }
+      }
+      return opts as ConfigOverride
+    } else {
+      return {}
+    }
   }
   throttle(
     node: TaskGraphNode,

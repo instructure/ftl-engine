@@ -189,6 +189,7 @@ export class Processor implements IProcessor {
     var name = path.basename(file, path.extname(file))
     const newNode = _.clone(taskDef) as TaskGraphNodeDeps
     newNode.id = this.buildId(args, name)
+    newNode.type = 'activity'
     newNode.name = name
     newNode.deps = taskBuilder.dependsOn || []
     newNode.sourceFile = file
