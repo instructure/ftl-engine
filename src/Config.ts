@@ -1,6 +1,7 @@
 import * as path from 'path'
 import * as _ from 'lodash'
 import { EventEmitter } from 'events'
+import { SWF } from 'aws-sdk'
 
 import { SWFConfig, ConfigOverrides, ConfigOverride } from 'simple-swf/build/src/SWFConfig'
 import { Domain } from 'simple-swf/build/src/entities'
@@ -8,11 +9,11 @@ import { FieldSerializer, S3ClaimCheck, ClaimCheck } from 'simple-swf/build/src/
 import { Logger } from './lib/Logger'
 import { Notifier, SNSNotifier, SNSNotiferConfig } from './lib/Notifier'
 import { MetricReporter, StatsDMetricReporter, StatsDMetricReporterConfig } from './lib/MetricReporter'
-import { ActivityRegistry } from './entities'
-import { DeciderRegistry } from './entities'
+import { ActivityRegistry, DeciderRegistry } from './entities'
 
 export class Config {
   swfConfig: SWFConfig
+  swfClient: SWF
   logger: Logger
   notifier: Notifier
   metricReporter: MetricReporter
@@ -31,6 +32,8 @@ export class Config {
     }
     const userConfig = this.populateUserConfig(configFunc())
     this.userConfig = userConfig
+    this.swfClient = userConfig.swfClient || new SWF({region: userConfig.region || 'us-east-1' })
+
 
     this.domainName = userConfig.swf.domainName
     this.workflowName = userConfig.swf.workflowName
@@ -42,7 +45,7 @@ export class Config {
     this.swfConfig = new SWFConfig(this.defaultSwfConf(userConfig.swf))
     this.activities = this.buildActivityRegistry(userConfig.activities)
     this.deciders = this.buildDeciderRegistry()
-    this.domain = userConfig.swf.domainInstance || new Domain(this.domainName, this.swfConfig, userConfig.swfClient)
+    this.domain = userConfig.swf.domainInstance || new Domain(this.domainName, this.swfConfig, this.swfClient)
 
     if (!userConfig.fieldSerializer.instance) {
       let claimCheck = userConfig.claimCheck.instance || this.buildClaimCheck(userConfig.claimCheck)

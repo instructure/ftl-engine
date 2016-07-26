@@ -1,7 +1,7 @@
 // runs any generic bash script
 import { spawn, ChildProcess } from 'child_process'
 import { S3 } from 'aws-sdk'
-import { FTLActivity } from '../entities'
+import { FTLActivity } from '../../src'
 import { Config } from '../Config'
 const MAX_LENGTH = 32768
 export default class Script extends FTLActivity {

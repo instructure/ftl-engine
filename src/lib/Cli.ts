@@ -1,7 +1,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import { Readable } from 'stream'
-
+import * as async from 'async'
 import * as yargs from 'yargs'
 import * as _ from 'lodash'
 import * as shortId from 'shortid'
@@ -147,11 +147,6 @@ export class Cli {
     })
   }
   startWorkers(args: any, cb: {(Error?)}) {
-    let workerStates = {
-      activity: true,
-      decider: true,
-    }
-    let cbCalled = false
     function toStop(worker: ActivityWorker | DeciderWorker, name: 'activity' | 'decider', cb: {(Error?)}) {
       worker.on('error', (err: Error, execution?: any) => {
         let withExecution = execution ? ` with execution ${execution.id}` : ''
@@ -161,25 +156,15 @@ export class Cli {
           return cb(err)
         })
       })
-      process.on('SIGINT', () => {
-        worker.stop((err) => {
-          if (err) return cb(err)
-          workerStates[name] = true
-          this.config.logger.info(`stopped ${name} worker`)
-          if (workerStates.activity && workerStates.decider && !cbCalled) {
-            cbCalled = true
-            return cb()
-          }
-        })
-      })
     }
+    const workers = {}
     if (args.activity) {
-      workerStates.activity = false
       toStop.call(this, this.activityWorker, 'activity', cb)
+      workers['activityWorker'] = this.activityWorker
     }
     if (args.decider) {
-      workerStates.decider = false
       toStop.call(this, this.deciderWorker, 'decider', cb)
+      workers['deciderWorker'] = this.deciderWorker
     }
     this.startActivityWorker(args.activity, (err) => {
       if (err) return cb(err)
@@ -187,6 +172,23 @@ export class Cli {
         if (err) return cb(err)
         this.config.logger.info('started workers')
       })
+    })
+    let gotSigint = false
+    process.on('SIGINT', () => {
+      if (gotSigint) {
+        this.config.logger.warn('forcefully exiting, some tasks may have left an invalid state')
+        return process.exit(1)
+      }
+      this.config.logger.info('signalling workers to exit cleanly, ctrl+c again to immediately exit')
+      gotSigint = true
+      async.each(Object.keys(workers), (name, cb) => {
+        let worker = workers[name]
+        worker.stop((err) => {
+          if (err) return cb(err)
+          this.config.logger.info(`stopped ${name} worker`)
+          cb()
+        })
+      }, cb)
     })
   }
   startActivityWorker(shouldStart: boolean, cb: {(err: Error | null, s: boolean)}) {

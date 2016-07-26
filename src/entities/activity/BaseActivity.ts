@@ -28,6 +28,7 @@ export class FTLActivity {
     throw new Error('must provide validateTask function')
   }
   static maxConcurrent?: number
+  static maxRetry?: number
   static version?: string
 }
 
@@ -67,6 +68,11 @@ export class BaseActivity extends SWFActivity {
     return this.activity.status()
   }
   stop(reason: StopReasons, cb: {(Error?)}) {
-    this.activity.stop(cb)
+    this.config.logger.debug('calling stop on activity')
+    this.activity.stop((err) => {
+      if (err) return cb(err)
+      this.config.logger.debug('activity stopped')
+      cb()
+    })
   }
 }

@@ -38,6 +38,25 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
       cb()
     })
   }
+  stop(cb: {(err?: Error)}) {
+    const curActivityNames = Object.keys(this.activeActivities)
+    let cbCalled = false
+
+    let waitTimeout = setTimeout(() => {
+      if (cbCalled) return
+      cbCalled = true
+      cb(new Error('running activities did not stop in time, some activities may have left invalid state'))
+    }, 1000 * 30)
+    this.logInfo(`requesting ${curActivityNames.length} stop, will wait 30 seconds`, {running: curActivityNames})
+    super.stop((err) => {
+      if (cbCalled) return
+      cbCalled = true
+      clearTimeout(waitTimeout)
+      if (!err) this.logInfo('successfully stopped activitiy worker')
+      cb(err)
+    })
+
+  }
   onStartTask(task: ActivityTask, execution: Activity) {
     this.activityTimers[task.id] = new Date()
     this.ftlConfig.metricReporter.increment('activity.running')

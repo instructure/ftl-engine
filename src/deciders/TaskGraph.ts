@@ -114,7 +114,7 @@ export default class TaskGraph extends BaseDecider {
           const handlerActType = this.activities.getModule(node.handler)
           if (!handlerActType) throw new Error('missing activity type ' + node.handler)
           let opts = this.buildOpts(node)
-          opts['maxRetry'] = node.maxRetry || this.ftlConfig.getOpt('maxRetry')
+          opts['maxRetry'] = node.maxRetry || handlerActType.getMaxRetry() || this.ftlConfig.getOpt('maxRetry')
           decisionTask.scheduleTask(node.id, node, handlerActType, opts)
         }
       }

@@ -7,11 +7,13 @@ import { Config } from '../../Config'
 export class ActivityType extends SWFActivtyType implements BaseHandler {
   ActivityHandler: typeof FTLActivity
   config: Config
+  loadLocation: string
   constructor(HandlerClass: typeof FTLActivity, loadLocation: string, config: Config) {
     const version = HandlerClass.version || config.defaultVersion
-    const maxRetry = config.getOpt('maxRetry')
+    const maxRetry = HandlerClass.maxRetry || config.getOpt('maxRetry')
     super(HandlerClass.getHandlerName(), version, BaseActivity, { maxRetry: maxRetry })
     this.ActivityHandler = HandlerClass
+    this.loadLocation = loadLocation
     this.config = config
   }
   createExecution(workflow: Workflow, task: ActivityTask): BaseActivity {
@@ -25,5 +27,9 @@ export class ActivityType extends SWFActivtyType implements BaseHandler {
   }
   getMaxConcurrent(): number | null {
     return this.ActivityHandler.maxConcurrent || null
+  }
+  getMaxRetry(): number | null {
+    return this.ActivityHandler.maxRetry || null
+
   }
 }
