@@ -12,10 +12,11 @@
     "lint": "tslint src/*.ts src/**/*.ts",
     "clean": "rm -rf build",
     "build-full": "npm run clean && npm run typings && tsc",
-    "build": "tsc",
+    "build": "tsc && ./copyNonTs.sh",
     "typings": "npm run typings-clean && typings install",
     "typings-clean": "rm -rf typings",
-    "prepublish": "npm run build-full"
+    "prepublish": "npm run build-full",
+    "dev": "ftl-engine -c dev-config.js server"
   },
   "nyc": {
     "include": [
@@ -61,9 +62,21 @@
   "dependencies": {
     "async": "^2.0.32",
     "aws-sdk": "^2.4.7",
+    "browserify-middleware": "^7.0.0",
     "bunyan": "^1.8.1",
-    "in-publish": "^2.0.0",
+    "express": "^4.14.0",
     "lodash": "^4.10.0",
+    "material-ui": "^0.15.2",
+    "react": "^15.2.1",
+    "react-dom": "^15.2.1",
+    "react-redux": "^4.4.5",
+    "react-router": "^2.6.0",
+    "react-router-redux": "^4.0.5",
+    "react-tap-event-plugin": "^1.0.0",
+    "redux": "^3.5.2",
+    "redux-actions": "^0.10.1",
+    "redux-logger": "^2.6.1",
+    "redux-thunk": "^2.1.0",
     "shortid": "^2.2.6",
     "simple-swf": "0.2.0-beta",
     "source-map-support": "^0.4.0",

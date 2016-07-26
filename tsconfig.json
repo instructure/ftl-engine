@@ -6,7 +6,8 @@
     "sourceMap": true,
     "declaration": true,
     "strictNullChecks": true,
-    "outDir": "build/"
+    "outDir": "build/",
+    "jsx": "react"
   },
   "formatCodeOptions": {
     "indentSize": 2,

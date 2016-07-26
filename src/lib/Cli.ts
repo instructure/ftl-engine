@@ -12,6 +12,7 @@ import { registration, InitedEntities } from '../init'
 import { validator } from './validator'
 import { Processor, MetadataStore } from '../generator'
 import { StringToStream } from './StringToStream'
+import { buildServer } from '../server'
 
 export class Cli {
   config: Config
@@ -91,6 +92,19 @@ export class Cli {
         normalize: true
       }).fail(this.printStack.bind(this, yargs)) as any
     }, this.generate.bind(this, cb))
+    .command('server', 'start the ftl engine service', (yargs) => {
+      return yargs.reset().option('config', {
+        alias: 'c',
+        describe: 'js config module to load',
+        demand: true,
+        string: true
+      }).option('port', {
+        alias: 'p',
+        describe: 'port to listen on',
+        default: 8182,
+        number: true
+      }).fail(this.printStack.bind(this, yargs)) as any
+    }, this.server.bind(this, cb))
     this.cli.argv
     return this.cli
   }
@@ -271,6 +285,20 @@ export class Cli {
         instream.pipe(outStream)
       })
 
+    })
+  }
+  server(cb: {(err: Error | null)}, args: any) {
+    this.init(args.config, (err, entities) => {
+      if (err) return cb(err)
+      const { config } = entities!
+      const server = buildServer(config)
+      server.listen(args.port as number, (err) => {
+        if (err) {
+          config.logger.fatal('failed to start server')
+          return cb(err)
+        }
+        config.logger.info(`started server on port ${args.port}`)
+      })
     })
   }
 }
