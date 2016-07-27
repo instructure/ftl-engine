@@ -17,7 +17,7 @@ export function getDomains() {
     superagent.get('/domains').
     end((err, resp) => {
       if (err) return dispatch(fetchDomainsFailed(err.message))
-      dispatch(gotDomains(resp.body))
+      dispatch(gotDomains(resp.body.data))
     })
   }
 }
