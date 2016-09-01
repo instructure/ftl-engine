@@ -1,6 +1,6 @@
 {
   "name": "ftl-engine",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A scalable, fault-tolerant distributed task runner for complex workflows",
   "main": "index.js",
   "scripts": {
