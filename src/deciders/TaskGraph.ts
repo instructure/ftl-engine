@@ -15,7 +15,6 @@ export interface TaskGraphNode {
   sourceDir: string
   parameters: any
   maxRetry?: number
-  deps?: string[]
 }
 
 export interface TaskGraphActivityNode extends TaskGraphNode {
