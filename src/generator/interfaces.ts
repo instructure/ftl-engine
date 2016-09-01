@@ -6,6 +6,7 @@ export interface ITaskBuilder {
   create(args: any, state: any, cb: {(err: Error | null, task: Task | null)})
   create(args: any, state: any): Task
   dependsOn?: string[]
+  maxRetry?: number
   setState?: {(state: any, cb: {(err: Error | null, state: any)})}
 
 }
