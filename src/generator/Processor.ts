@@ -192,6 +192,7 @@ export class Processor implements IProcessor {
     newNode.type = 'activity'
     newNode.name = name
     newNode.deps = taskBuilder.dependsOn || []
+    newNode.maxRetry = taskBuilder.maxRetry
     newNode.sourceFile = file
     newNode.sourceDir = this.getCurrentDir()
     return newNode
