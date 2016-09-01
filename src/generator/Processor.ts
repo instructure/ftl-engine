@@ -14,7 +14,7 @@ import { genUtil } from './util'
 
 // allow for overriding of some behavior via json
 const OPT_FILE_NAME = 'opts.json'
-// default to retring a full workflow only once!
+// default to retrying a full workflow only once!
 const GRAPH_MAX_RETRY = 1
 
 interface ProcessorOpts {
@@ -192,6 +192,7 @@ export class Processor implements IProcessor {
     newNode.type = 'activity'
     newNode.name = name
     newNode.deps = taskBuilder.dependsOn || []
+    newNode.maxRetry = taskBuilder.maxRetry
     newNode.sourceFile = file
     newNode.sourceDir = this.getCurrentDir()
     return newNode
