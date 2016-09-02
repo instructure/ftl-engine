@@ -45,7 +45,7 @@ export class SNSNotifier extends EventEmitter implements Notifier {
   sendLevel(level: LogLevels, summary: string, event: any, cb?: {(err?: Error, resp?: SNS.PublishResponse)}) {
     let params = {
       TopicArn: this.getArn(),
-      Message: this.buildMessage(level, event, summary),
+      Message: this.buildMessage(level, summary, event),
       Subject: level + ' - ' + summary
     }
     if (this.config.silenceNotifier) return
