@@ -42,6 +42,17 @@ export class DeciderWorker extends SWFDeciderWorker implements LogWorkerMixin {
     this.ftlConfig.metricReporter.increment('decider.completed')
     this.ftlConfig.metricReporter.timing('decider.timer', finishTime)
     this.logInfo('responded to decision task', this.buildTaskMeta(task, { results: task.getDecisionInfo() }))
+    const failedWorkflows = task.decisions.filter((d) => d.decision.decisionType === 'FailWorkflowExecution')
+    // there should only really be one failedWorkflow
+    if (failedWorkflows.length) {
+      const wf = failedWorkflows[0]
+      this.ftlConfig.notifier.sendError('workflowFailed', {
+        workflow: task.getWorkflowInfo(),
+        parentWf: task.getParentWorkflowInfo(),
+        details: wf.decision.failWorkflowExecutionDecisionAttributes!.details,
+        reason: wf.decision.failWorkflowExecutionDecisionAttributes!.reason
+      })
+    }
     this.emit('decisionCompleted', task.decisions.map((d) => d.decision ))
   }
   onPoll() {

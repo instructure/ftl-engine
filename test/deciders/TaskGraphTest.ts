@@ -4,13 +4,11 @@ import * as shortId from 'shortid'
 import { Workflow } from 'simple-swf/build/src/entities'
 import { DecisionTask, EventData, EventRollup } from 'simple-swf/build/src/tasks'
 
-
 import { default as newContext, SinonHelper, ClassMock } from '../sinonHelper'
 import { Config } from '../../src/Config'
 import { Logger } from '../../src/lib'
 import { ActivityRegistry, ActivityType } from '../../src/entities'
 import { default as TaskGraph, TaskGraphParameters, TaskGraphNode, TaskGraphGraph } from '../../src/deciders/TaskGraph'
-
 
 interface getModuleStub {(name: string): ActivityType | null}
 
