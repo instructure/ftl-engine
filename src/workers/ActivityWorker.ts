@@ -71,7 +71,8 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     execution.on('heartbeatComplete', this.onTaskHBComplete.bind(this, task, execution))
     this.ftlConfig.notifier.sendInfo('taskStarted', {
       task: taskInfo.task,
-      workflow: task.getWorkflowInfo()
+      workflow: task.getWorkflowInfo(),
+      originWorkflow: task.getOriginWorkflow()
     })
   }
   onFinishedTask(task: ActivityTask, execution: Activity, success: boolean, details: TaskStatus) {
@@ -100,6 +101,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     this.ftlConfig.notifier.sendInfo('taskFinished', {
       task: taskInfo,
       workflow: task.getWorkflowInfo(),
+      originWorkflow: task.getOriginWorkflow(),
       details
     })
     this.logInfo('task completed', this.buildTaskMeta(task, { details: details }))
@@ -111,6 +113,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     this.ftlConfig.notifier.sendWarn('taskFailed', {
       task: taskInfo,
       workflow: task.getWorkflowInfo(),
+      originWorkflow: task.getOriginWorkflow(),
       details,
       err
     })
@@ -124,6 +127,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     this.ftlConfig.notifier.sendWarn('taskCanceled', {
       task: taskInfo,
       workflow: task.getWorkflowInfo(),
+      originWorkflow: task.getOriginWorkflow(),
       reason: reason
     })
     this.logInfo('task canceled', this.buildTaskMeta(task, { reason: reason }))
@@ -134,6 +138,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     this.ftlConfig.notifier.sendError('taskError', {
       task: taskInfo,
       workflow: task.getWorkflowInfo(),
+      originWorkflow: task.getOriginWorkflow(),
       err
     })
     this.emit('error', err, execution)
@@ -143,6 +148,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     this.ftlConfig.notifier.sendInfo('taskHeartbeat', {
       task: taskInfo,
       workflow: task.getWorkflowInfo(),
+      originWorkflow: task.getOriginWorkflow(),
       status
     })
     this.logInfo('task heartbeat status', this.buildTaskMeta(task, { status: status }))

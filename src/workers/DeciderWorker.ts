@@ -49,6 +49,7 @@ export class DeciderWorker extends SWFDeciderWorker implements LogWorkerMixin {
       this.ftlConfig.notifier.sendError('workflowFailed', {
         workflow: task.getWorkflowInfo(),
         parentWf: task.getParentWorkflowInfo(),
+        originWorkflow: task.getOriginWorkflow(),
         details: wf.decision.failWorkflowExecutionDecisionAttributes!.details,
         reason: wf.decision.failWorkflowExecutionDecisionAttributes!.reason
       })

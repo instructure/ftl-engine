@@ -1,6 +1,6 @@
 {
   "name": "ftl-engine",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A scalable, fault-tolerant distributed task runner for complex workflows",
   "main": "index.js",
   "scripts": {
@@ -45,7 +45,7 @@
     "in-publish": "^2.0.0",
     "lodash": "^4.10.0",
     "shortid": "^2.2.6",
-    "simple-swf": "^0.0.4",
+    "simple-swf": "^0.0.6",
     "source-map-support": "^0.4.0",
     "statsd-client": "^0.2.2",
     "superagent": "^2.1.0",
