@@ -6,6 +6,9 @@ import { syncHistoryWithStore } from 'react-router-redux'
 import configureStore from './store/configureStore'
 import routes from './routes'
 
+import * as injectTapEventPlugin from 'react-tap-event-plugin'
+injectTapEventPlugin()
+
 const store = configureStore({domains: []})
 
 const history = syncHistoryWithStore(browserHistory, store)

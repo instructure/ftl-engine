@@ -1,0 +1,8 @@
+#!/bin/bash
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR/..
+export PATH=$DIR/../node_modules/.bin:$PATH
+npm run build
+tsc --watch &
+nodemon --config ./nodemon.json

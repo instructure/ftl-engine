@@ -8,6 +8,7 @@ module.exports = function() {
       awsAccountId: '123456789'
     },
     logger: {
+      devMode: true,
       name: 'ftl-engine'
     },
     swf: {

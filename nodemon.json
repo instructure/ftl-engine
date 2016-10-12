@@ -1,0 +1,7 @@
+{
+  "watch": [
+    "build"
+  ],
+  "ext": "*.js",
+  "exec": "./bin/ftl-engine -c ./dev-config.js server"
+}

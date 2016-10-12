@@ -5,15 +5,16 @@ import RaisedButton from 'material-ui/RaisedButton'
 import IconMenu from 'material-ui/IconMenu';
 import IconButton from 'material-ui/IconButton';
 import NavigationExpandMoreIcon from 'material-ui/svg-icons/navigation/expand-more';
-import WorkflowModal, {IWorkflowModal} from './workflowModal'
+import {IWorkflowId} from '../../types'
 
-export interface IWorkflowToolGroup extends React.Props<any> {
-  selectedWorkflow?: {
-    workflowId: string,
-    runId: string
-  }
+export interface IWorkflowToolGroupP extends React.Props<any> {
+  selectedWorkflow?: IWorkflowId
   workflowStatus: string
+}
+export interface IWorkflowToolGroupD extends React.Props<any> {
   openChangeWorkflow(): any
+}
+export interface IWorkflowToolGroup extends IWorkflowToolGroupP, IWorkflowToolGroupD {
 }
 
 export default class WorkflowToolGroup extends React.Component<IWorkflowToolGroup, void> {
@@ -46,14 +47,14 @@ export default class WorkflowToolGroup extends React.Component<IWorkflowToolGrou
         {workflowStatus}
         <RaisedButton label="Select Workflow" primary={true} onClick={this.props.openChangeWorkflow} />
         <IconMenu
-            iconButtonElement={
-              <IconButton touch={true}>
-                <NavigationExpandMoreIcon />
-              </IconButton>
-            }
+          iconButtonElement={
+            <IconButton touch={true}>
+              <NavigationExpandMoreIcon />
+            </IconButton>
+          }
           >
-            <MenuItem primaryText='Terminate' />
-          </IconMenu>
+            <MenuItem primaryText='Terminate' disabled={!this.props.selectedWorkflow}/>
+        </IconMenu>
       </ToolbarGroup>
     )
   }
