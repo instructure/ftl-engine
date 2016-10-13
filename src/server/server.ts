@@ -2,7 +2,9 @@ import * as express from 'express'
 import * as path from 'path'
 const browserify = require('browserify-middleware')
 import { SWF } from 'aws-sdk'
-import { processEvents } from 'simple-swf/build/src/tasks/processEvents'
+import * as Domain from 'simple-swf/build/src/entities/Domain'
+import * as Workflow from 'simple-swf/build/src/entities/Workflow'
+import * as WorkflowExecution from 'simple-swf/build/src/entities/WorkflowExecution'
 import { Config } from '../Config'
 import * as moment from 'moment'
 
@@ -24,14 +26,9 @@ export function buildServer(config: Config): express.Express {
     res.json({success: true, data: config.activities.getModules().map((act) => act.name)})
   })
   app.get('/domains', (req, res, next) => {
-    let domains: string[] = []
-    swfClient.listDomains({registrationStatus: 'REGISTERED'}).eachPage((err, data) => {
+    Domain.Domain.listDomains(config.swfConfig, swfClient, 'REGISTERED', (err, domains) => {
       if (err) return next(err)
-      if (!data) {
-        res.json({success: true, data: domains})
-        return
-      }
-      domains = domains.concat(data.domainInfos.map((di) => di.name))
+      res.json({success: true, data: domains!.map((d) => d.name)})
     })
   })
   function getDate(ts, buildDefault) {
@@ -39,8 +36,8 @@ export function buildServer(config: Config): express.Express {
   }
   app.get('/domains/:domainId/workflows', (req, res, next) => {
     const closed = req.query.closed === 'true' ? true : false
+    const domain = Domain.Domain.loadDomain(config.swfConfig, swfClient, req.params.domainId)
     const opts: any = {
-      domain: req.params.domainId,
       maximumPageSize: req.query.maxPageSize || 500,
       startTimeFilter: {
         oldestDate: getDate(req.query.oldestDate, buildDefaultOldDate),
@@ -56,44 +53,26 @@ export function buildServer(config: Config): express.Express {
         name: config.workflowName
       }
     }
-    if (closed) {
-      swfClient.listClosedWorkflowExecutions(opts as SWF.ListClosedWorkflowExecutionsInput, (err, data) => {
-        if (err) return next(err)
-        res.json({success: true, data: data.executionInfos})
-      })
-    } else {
-      swfClient.listOpenWorkflowExecutions(opts as SWF.ListOpenWorkflowExecutionsInput, (err, data) => {
-        if (err) return next(err)
-        console.log(data.executionInfos[0])
-        res.json({success: true, data: data.executionInfos})
-      })
-    }
+    const castOpts =  closed ? opts as Domain.ClosedFilter : opts as Domain.ListFilter
+    const method = closed ? domain.listClosedWorkflowExecutions : domain.listOpenWorkflowExecutions
+    method.call(domain, config.fieldSerializer, castOpts, (err, wfExections?: WorkflowExecution.WorkflowExecution[]) => {
+      if (err) return next(err)
+      const executions = (wfExections || []).map((wf) => wf.toJSON())
+      res.json({success: true, data: executions})
+    })
   })
-  function deserializeEvents(events: SWF.HistoryEvent[], cb) {
-
-
-  }
   app.get('/domains/:domainId/workflows/:workflowId/:runId', (req, res, next) => {
-    let events: SWF.HistoryEvent[] = []
+    const domain = Domain.Domain.loadDomain(config.swfConfig, swfClient, req.params.domainId)
     const wfId = decodeURIComponent(req.params.workflowId)
     const runId = decodeURIComponent(req.params.runId)
-    swfClient.getWorkflowExecutionHistory({
-      domain: req.params.domainId,
-      execution: {workflowId: wfId, runId: runId}
-    }).eachPage((err, data) => {
+    const wf = new Workflow.Workflow(domain, config.workflowName, config.defaultVersion, config.fieldSerializer)
+    const wfExec = new WorkflowExecution.WorkflowExecution(wf, {workflowId: wfId, runId})
+    wfExec.getWorkflowExecutionHistory({}, (err, hist) => {
       if (err) return next(err)
-      if (!data) {
-        res.json({
-          success: true,
-          data: {
-            progress: processEvents(events),
-            graph: events[0].workflowExecutionStartedEventAttributes
-
-          }
-        })
-        return
-      }
-      events = events.concat(data.events)
+      res.json({
+        success: true,
+        data: hist
+      })
     })
   })
   return app
