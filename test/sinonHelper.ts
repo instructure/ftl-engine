@@ -48,7 +48,6 @@ export class SinonHelper implements Sinon.SinonSandbox {
 
   }
 }
-
 function newContext(): SinonHelper {
   let sandbox = Sinon.sandbox.create()
   let helper = new SinonHelper

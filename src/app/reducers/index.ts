@@ -1,5 +1,5 @@
 import { handleActions } from 'redux-actions'
-import { combineReducers } from 'redux'
+import { combineReducers, Action, Reducer } from 'redux'
 import { routerReducer } from 'react-router-redux'
 import WorkflowReducers from './workflow'
 import DomainReducers from './domain'

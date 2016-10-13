@@ -3,5 +3,5 @@
     "build"
   ],
   "ext": "*.js",
-  "exec": "./bin/ftl-engine -c ./dev-config.js server"
+  "exec": "./bin/ftl-engine -c ./ftlConfig.js server"
 }

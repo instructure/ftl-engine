@@ -1,7 +1,7 @@
 // electing to user superagent, as I can do cb style for now but transition to promises easily if
 // I can stomach it
 import * as superagent from 'superagent'
-import { createAction } from 'redux-actions'
+import { createAction, Action } from 'redux-actions'
 
 export const GOT_DOMAINS = 'gotDomains'
 export const gotDomains = createAction(GOT_DOMAINS)

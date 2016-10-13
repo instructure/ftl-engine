@@ -1,5 +1,5 @@
 import * as superagent from 'superagent'
-import { createAction } from 'redux-actions'
+import { createAction, Action } from 'redux-actions'
 import {WorkflowQueryOpts} from '../components/WorkflowSelector'
 import {IWorkflowId} from '../types'
 
