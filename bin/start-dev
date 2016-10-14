@@ -7,7 +7,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $DIR/..
 export PATH=$DIR/../node_modules/.bin:$PATH
 echo "running initial build"
-npm run build
+npm run build:quick
 ./bin/ftl-engine -c dev-config.js compileActivities
 echo "finished with build"
 

@@ -1,5 +1,10 @@
-node_modules
+node_modules/
 .git/
-build
-db_data
-private-env
+.awcache/
+build/
+build-app/
+typings/
+npm_debug
+coverage/
+npm-debug.log
+debug.json

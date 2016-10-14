@@ -106,6 +106,7 @@
     "components/nav/workflowToolGroup.tsx",
     "components/workflowModal.tsx",
     "components/workflowSelector.tsx",
+    "main.tsx",
     "routes.tsx"
   ]
 }

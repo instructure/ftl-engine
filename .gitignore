@@ -1,6 +1,7 @@
 node_modules/*
+.awcache/*
 build/*
-app-build/*
+build-app/*
 typings/*
 npm_debug
 coverage/

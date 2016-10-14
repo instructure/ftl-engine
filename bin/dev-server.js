@@ -4,10 +4,11 @@ const config = require('../webpack.config')
 
 const port = process.env.DEV_PORT || 3000
 const target = process.env.APP_TARGET || 'http://localhost:3001'
-new WebpackDevServer(webpack(config), {
+let serverOpts = {
   publicPath: config.output.publicPath,
   hot: true,
   historyApiFallback: true,
+  contentBase: './build-app',
   proxy: {
     '/api': {
       target: target,
@@ -18,7 +19,25 @@ new WebpackDevServer(webpack(config), {
       secure: false
     }
   }
-}).listen(port, 'localhost', function (err, result) {
+}
+if (process.env.QUIET_WEBPACK) {
+  serverOpts = Object.assign(serverOpts, {
+    quiet: false,
+    noInfo: false,
+    stats: {
+      // Config for minimal console.log mess.
+      assets: false,
+      colors: true,
+      version: false,
+      hash: false,
+      timings: false,
+      chunks: false,
+      chunkModules: false
+    }
+  })
+}
+new WebpackDevServer(webpack(config), serverOpts)
+.listen(port, 'localhost', function (err, result) {
   if (err) {
     return console.log(err)
   }
