@@ -14,7 +14,7 @@ export const domainSelected = createAction(DOMAIN_SELECTED)
 
 export function getDomains() {
   return (dispatch, getState) => {
-    superagent.get('/domains').
+    superagent.get('api/domains').
     end((err, resp) => {
       if (err) return dispatch(fetchDomainsFailed(err.message))
       dispatch(gotDomains(resp.body.data))

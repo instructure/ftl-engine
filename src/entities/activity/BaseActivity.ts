@@ -27,6 +27,7 @@ export class FTLActivity {
   static validateTask(parameters: any): string | null {
     throw new Error('must provide validateTask function')
   }
+  static UIComponentPath?: string
   static maxConcurrent?: number
   static maxRetry?: number
   static version?: string

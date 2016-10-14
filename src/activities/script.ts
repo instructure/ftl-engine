@@ -1,5 +1,6 @@
 // runs any generic bash script
 import { spawn, ChildProcess } from 'child_process'
+import * as path from 'path'
 import { S3 } from 'aws-sdk'
 import { FTLActivity } from '../../src'
 import { Config } from '../Config'
@@ -99,4 +100,6 @@ export default class Script extends FTLActivity {
     if (!haveS3Script && !haveTextScript) return 'require either scriptUrl and bucket params or script param'
     return null
   }
+  // slightly odd, since this is going to get compiled, its going to end up with script.js!
+  static UIComponentPath = path.resolve(__dirname, 'components', 'scriptComponent.js')
 }

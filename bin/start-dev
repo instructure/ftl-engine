@@ -1,0 +1,19 @@
+#!/bin/bash
+
+trap "killall background" SIGINT
+trap "killall background" EXIT
+set -e
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR/..
+export PATH=$DIR/../node_modules/.bin:$PATH
+echo "running initial build"
+npm run build
+./bin/ftl-engine -c dev-config.js compileActivities
+echo "finished with build"
+
+tsc --watch &
+nodemon --config ./nodemon.json &
+node bin/dev-server.js
+
+echo "things have stopped, making sure they get killed"
+pkill -P $$

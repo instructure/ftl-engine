@@ -57,7 +57,7 @@ export function getWorkflows() {
     const query = convertWorkflowFetchOpts(state.workflowFetchOpts || {})
     if (!selectedDomain) return dispatch(fetchWorkflowsFailed('no domain selected'))
     superagent
-    .get(`/domains/${selectedDomain}/workflows`)
+    .get(`api/domains/${selectedDomain}/workflows`)
     .query(query)
     .end((err, resp) => {
       if (err) return dispatch(fetchWorkflowsFailed(err.message))
@@ -76,7 +76,7 @@ export function loadWorkflow() {
     const wfId = encodeURIComponent(selectedWorkflow.workflowId)
     const runId = encodeURIComponent(selectedWorkflow.runId)
     superagent
-    .get(`/domains/${selectedDomain}/workflows/${wfId}/${runId}`)
+    .get(`api/domains/${selectedDomain}/workflows/${wfId}/${runId}`)
     .end((err, resp) => {
       if (err) return dispatch(fetchWorkflowsFailed(err.message))
       dispatch(workflowLoaded(resp.body.data))

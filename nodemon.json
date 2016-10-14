@@ -1,7 +1,8 @@
 {
+  "verbose": true,
   "watch": [
-    "build"
+    "build/src/server/*.js"
   ],
   "ext": "*.js",
-  "exec": "./bin/ftl-engine -c ./ftlConfig.js server"
+  "exec": "./bin/ftl-engine -c ./dev-config.js server -p 3001 --skip_compile"
 }

@@ -13,6 +13,7 @@ import { validator } from './validator'
 import { Processor, MetadataStore } from '../generator'
 import { StringToStream } from './StringToStream'
 import { buildServer } from '../server'
+import compileActivities from '../compileActivities'
 
 export class Cli {
   config: Config
@@ -103,8 +104,21 @@ export class Cli {
         describe: 'port to listen on',
         default: 8182,
         number: true
+      }).option('skip_compile', {
+        alias: 's',
+        describe: 'Skip webpack compilation of activites, must run compileActivities if this option is used',
+        default: false,
+        boolean: true
       }).fail(this.printStack.bind(this, yargs)) as any
     }, this.server.bind(this, cb))
+    .command('compileActivities', 'compile frontend JS for custom activities', (yargs) => {
+      return yargs.reset().option('config', {
+        alias: 'c',
+        describe: 'js config module to load',
+        demand: true,
+        string: true
+      }).fail(this.printStack.bind(this, yargs)) as any
+    }, this.compile.bind(this, cb))
     this.cli.argv
     return this.cli
   }
@@ -292,13 +306,35 @@ export class Cli {
       if (err) return cb(err)
       const { config } = entities!
       const server = buildServer(config)
-      server.listen(args.port as number, (err) => {
-        if (err) {
-          config.logger.fatal('failed to start server')
-          return cb(err)
-        }
-        config.logger.info(`started server on port ${args.port}`)
+      this.doCompile(config, args.skip_compile, (err) => {
+        if (err) return cb(err)
+        server.listen(args.port as number, (err) => {
+          if (err) {
+            config.logger.fatal('failed to start server')
+            return cb(err)
+          }
+          config.logger.info(`started server on port ${args.port}`)
+        })
       })
+    })
+  }
+  doCompile(config: Config, skip: boolean, cb:{(err?: Error | null)}) {
+    if (skip) return cb()
+    config.logger.info('compiling activities for browser (this may take a minute)')
+    compileActivities(config, (err) => {
+      if (err) {
+        config.logger.error('compiling activities failed')
+        return cb(err)
+      }
+      config.logger.info('finished compiling activities')
+      cb()
+    })
+  }
+  compile(cb: {(err: Error | null)}, args: any) {
+    this.init(args.config, (err, entities) => {
+      if (err) return cb(err)
+      const { config } = entities!
+      this.doCompile(config, false, cb)
     })
   }
 }

@@ -10,6 +10,7 @@ import { Logger } from './lib/Logger'
 import { Notifier, SNSNotifier, SNSNotiferConfig } from './lib/Notifier'
 import { MetricReporter, StatsDMetricReporter, StatsDMetricReporterConfig } from './lib/MetricReporter'
 import { ActivityRegistry, DeciderRegistry } from './entities'
+import defaultWebpackBuilder from './webpack.default'
 
 export class Config {
   swfConfig: SWFConfig
@@ -24,6 +25,7 @@ export class Config {
   deciders: DeciderRegistry
   domain: Domain
   fieldSerializer: FieldSerializer
+  webpackConfigBuilder: {(activityPaths: string[], outputPath: string): any}
   private customOpts: {[keyName: string]: any}
   private userConfig: any
   constructor(configFunc: {(): any}) {
@@ -46,6 +48,7 @@ export class Config {
     this.activities = this.buildActivityRegistry(userConfig.activities)
     this.deciders = this.buildDeciderRegistry()
     this.domain = userConfig.swf.domainInstance || new Domain(this.domainName, this.swfConfig, this.swfClient)
+    this.webpackConfigBuilder = userConfig.webpackConfigBuilder || defaultWebpackBuilder
 
     if (!userConfig.fieldSerializer.instance) {
       let claimCheck = userConfig.claimCheck.instance || this.buildClaimCheck(userConfig.claimCheck)
