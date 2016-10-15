@@ -10,7 +10,7 @@ export function buildServer(config: Config): express.Express {
   app.use('/', express.static(path.join(__dirname, 'public')))
   app.use('/activities', express.static(path.join(__dirname, '..', 'compileActivities', 'build')))
   const apiRouter = buildApi(config)
-
+  
   app.use('/api', apiRouter)
   return app
 

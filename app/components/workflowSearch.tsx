@@ -4,6 +4,7 @@ import Paper from 'material-ui/Paper'
 import RaisedButton from 'material-ui/RaisedButton'
 import DatePicker from 'material-ui/DatePicker'
 import TimePicker from 'material-ui/TimePicker'
+import { Field, reduxForm } from 'redux-form'
 // currently the TS defs for MakeSelectable are wrong
 // as the actual method name is underscore... so hacks...
 import * as ListStuff from 'material-ui/List'
@@ -21,22 +22,22 @@ export interface WorkflowQueryOpts {
   endDate: Date,
   endTime: Date
 }
-export interface IWorkflowSelectorP extends React.Props<any> {
+export interface IWorkflowSearchP extends React.Props<any> {
   workflows: IWorkflowInfo[]
   highlightedWorkflow: number,
   queryOpts: WorkflowQueryOpts
 }
-export interface IWorkflowSelectorD extends React.Props<any> {
+export interface IWorkflowSearchD extends React.Props<any> {
   refreshWorkflows(): any
   workflowHighlighted(): any
   changeQueryOpts(key: string): any,
 }
 
-export interface IWorkflowSelector extends IWorkflowSelectorP, IWorkflowSelectorD {
+export interface IWorkflowSearch extends IWorkflowSearchP, IWorkflowSearchD {
 }
 
 
-export default class WorkflowSelector extends React.Component<IWorkflowSelector, void> {
+export default class WorkflowSearch extends React.Component<IWorkflowSearch, void> {
   render() {
     return (
       <div>
@@ -76,7 +77,13 @@ export default class WorkflowSelector extends React.Component<IWorkflowSelector,
           value={this.props.highlightedWorkflow}
           onChange={this.props.workflowHighlighted} >
           { this.props && this.props.workflows.map((wf, i) => {
-            return <ListStuff.ListItem value={i.toString()} key={wf.execution.runId} primaryText={wf.execution.workflowId} />
+            return (
+              <ListStuff.ListItem
+                value={i.toString()}
+                key={wf.execution.runId}
+                primaryText={wf.execution.workflowId}>
+              </ListStuff.ListItem>
+            )
           })}
         </SelectableList>
       </div>

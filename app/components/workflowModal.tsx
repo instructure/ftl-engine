@@ -4,16 +4,16 @@ import { connect } from 'react-redux'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 import {IWorkflowId, IWorkflowInfo} from '../types'
-import WorkflowSelector, {IWorkflowSelector, IWorkflowSelectorP, IWorkflowSelectorD} from './workflowSelector'
+import WorkflowSearch, {IWorkflowSearch, IWorkflowSearchP, IWorkflowSearchD} from './workflowSearch'
 
 import {stopChangeWorkflow, workflowSelected, workflowHighlighted} from './../actions'
 import {getWorkflows, changeWorkflowFetch, loadWorkflow} from './../actions'
 
-export interface IWorkflowModalP extends IWorkflowSelectorP {
+export interface IWorkflowModalP extends IWorkflowSearchP {
   workflowModalOpen: boolean
   workflows: IWorkflowInfo[]
 }
-export interface IWorkflowModalD extends IWorkflowSelectorD {
+export interface IWorkflowModalD extends IWorkflowSearchD {
   handleWorkflowSelect(): any
   handleWorkflowCancel(): any
 }
@@ -45,7 +45,7 @@ export class WorkflowModal extends React.Component<IWorkflowModal, void> {
         open={this.props.workflowModalOpen}
         onRequestClose={this.props.handleWorkflowSelect}
       >
-        <WorkflowSelector
+      <WorkflowSearch
           workflows={this.props.workflows}
           queryOpts={this.props.queryOpts}
           highlightedWorkflow={this.props.highlightedWorkflow}

@@ -1,7 +1,8 @@
 {
   "name": "ftl-engine",
   "globalDependencies": {
-    "aws-sdk": "github:ingenieux/aws-sdk-typescript#7269f1ebd4"
+    "aws-sdk": "github:ingenieux/aws-sdk-typescript#7269f1ebd4",
+    "redux-form": "file:local_types/redux-form.d.ts"
   },
   "dependencies": {
     "d3-force": "file:local_types/d3-force.d.ts"

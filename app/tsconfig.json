@@ -85,6 +85,7 @@
     "../node_modules/@types/superagent/index.d.ts",
     "../node_modules/@types/yargs/index.d.ts",
     "../typings/globals/aws-sdk/index.d.ts",
+    "../typings/globals/redux-form/index.d.ts",
     "../typings/index.d.ts",
     "../typings/modules/d3-force/index.d.ts",
     "actions/domain.ts",
@@ -105,7 +106,7 @@
     "components/nav/mainNav.tsx",
     "components/nav/workflowToolGroup.tsx",
     "components/workflowModal.tsx",
-    "components/workflowSelector.tsx",
+    "components/workflowSearch.tsx",
     "main.tsx",
     "routes.tsx"
   ]

@@ -10,6 +10,7 @@ import {IWorkflowId} from '../../types'
 export interface IWorkflowToolGroupP extends React.Props<any> {
   selectedWorkflow?: IWorkflowId
   workflowStatus: string
+  haveDomain: boolean
 }
 export interface IWorkflowToolGroupD extends React.Props<any> {
   openChangeWorkflow(): any
@@ -34,7 +35,6 @@ export default class WorkflowToolGroup extends React.Component<IWorkflowToolGrou
         <ToolbarSeparator />
       </div>
     )
-
   }
 
   render() {
@@ -45,7 +45,10 @@ export default class WorkflowToolGroup extends React.Component<IWorkflowToolGrou
         <ToolbarTitle text={workflowTitle} />
         <ToolbarSeparator />
         {workflowStatus}
-        <RaisedButton label="Select Workflow" primary={true} onClick={this.props.openChangeWorkflow} />
+        <RaisedButton
+          disabled={!this.props.haveDomain}
+          label='Select Workflow' primary={true}
+          onClick={this.props.openChangeWorkflow} />
         <IconMenu
           iconButtonElement={
             <IconButton touch={true}>

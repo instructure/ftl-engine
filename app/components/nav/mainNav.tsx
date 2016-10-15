@@ -35,6 +35,7 @@ export class MainNav extends React.Component<IMainNavProps, void> {
             selectedWorkflow={this.props.selectedWorkflow}
             workflowStatus={this.props.workflowStatus}
             openChangeWorkflow={this.props.openChangeWorkflow}
+            haveDomain={this.props.haveDomain}
           />
         </Toolbar>
       </nav>
@@ -49,7 +50,8 @@ const MainNavBound = connect<IMainNavPropsP, IMainNavPropsD, void>(
       selectedDomain: state.app.selectedDomain as string,
       domains: state.app.domains as string[],
       selectedWorkflow: state.app.selectedWorkflow as IWorkflowId,
-      workflowStatus: state.app.workflowStatus as string
+      workflowStatus: state.app.workflowStatus as string,
+      haveDomain: state.app.selectedDomain ? true : false
     } as IMainNavPropsP
   },
   (dispatch) => {
