@@ -1,21 +1,22 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { Provider } from 'react-redux'
-import { Router, browserHistory } from 'react-router'
-import { syncHistoryWithStore } from 'react-router-redux'
+import { Provider, Store } from 'react-redux'
+import { Router } from 'react-router'
+import { ReactRouterReduxHistory } from 'react-router-redux'
 
-import configureStore from './store/configureStore'
 import routes from './routes'
+import { AllState } from './types'
 
-const store = configureStore({domains: []})
+export interface IApp extends React.Props<any> {
+  store: Store<AllState>
+  history: ReactRouterReduxHistory
+}
 
-const history = syncHistoryWithStore(browserHistory, store)
-
-export default class App extends React.Component<void, void> {
+export default class App extends React.Component<IApp, void> {
   render() {
     return (
-      <Provider store={ store }>
-        <Router history={ history }>
+      <Provider store={ this.props.store }>
+        <Router history={ this.props.history }>
           { routes }
         </Router>
       </Provider>

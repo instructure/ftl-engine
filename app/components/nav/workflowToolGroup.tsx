@@ -5,10 +5,10 @@ import RaisedButton from 'material-ui/RaisedButton'
 import IconMenu from 'material-ui/IconMenu';
 import IconButton from 'material-ui/IconButton';
 import NavigationExpandMoreIcon from 'material-ui/svg-icons/navigation/expand-more';
-import {IWorkflowId} from '../../types'
+import {WorkflowId} from '../../types'
 
 export interface IWorkflowToolGroupP extends React.Props<any> {
-  selectedWorkflow?: IWorkflowId
+  selectedWorkflow?: WorkflowId
   workflowStatus: string
   haveDomain: boolean
 }
@@ -28,7 +28,7 @@ export default class WorkflowToolGroup extends React.Component<IWorkflowToolGrou
   }
   getWorkflowStatus() {
     if (!this.props.selectedWorkflow) return
-    const wfStatus = `Status: ${this.props.workflowStatus}`
+    const wfStatus = `Status: ${this.props.workflowStatus || 'Unknown' }`
     return (
       <div>
         <ToolbarTitle text={wfStatus} />

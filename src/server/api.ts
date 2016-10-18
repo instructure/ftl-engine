@@ -6,6 +6,7 @@ import * as Workflow from 'simple-swf/build/src/entities/Workflow'
 import * as WorkflowExecution from 'simple-swf/build/src/entities/WorkflowExecution'
 
 import { Config } from '../Config'
+import * as types from './interfaces'
 
 
 function buildDefaultLatestDate() {
@@ -21,7 +22,7 @@ export function buildApi(config: Config): express.Router {
   apiRouter.get('/domains', (req, res, next) => {
     Domain.Domain.listDomains(config.swfConfig, swfClient, 'REGISTERED', (err, domains) => {
       if (err) return next(err)
-      res.json({success: true, data: domains!.map((d) => d.name)})
+      res.json({success: true, data: domains!.map((d) => d.name)} as types.ListDomainsResp)
     })
   })
   function getDate(ts, buildDefault) {
@@ -50,8 +51,8 @@ export function buildApi(config: Config): express.Router {
     const method = closed ? domain.listClosedWorkflowExecutions : domain.listOpenWorkflowExecutions
     method.call(domain, config.fieldSerializer, castOpts, (err, wfExections?: WorkflowExecution.WorkflowExecution[]) => {
       if (err) return next(err)
-      const executions = (wfExections || []).map((wf) => wf.toJSON())
-      res.json({success: true, data: executions})
+      const executions = (wfExections || []).map((wf) => wf.toJSON() as types.WorkflowInfo)
+      res.json({success: true, data: executions} as types.ListWorkflowsResp)
     })
   })
   apiRouter.get('/domains/:domainId/workflows/:workflowId/:runId', (req, res, next) => {
@@ -60,12 +61,12 @@ export function buildApi(config: Config): express.Router {
     const runId = decodeURIComponent(req.params.runId)
     const wf = new Workflow.Workflow(domain, config.workflowName, config.defaultVersion, config.fieldSerializer)
     const wfExec = new WorkflowExecution.WorkflowExecution(wf, {workflowId: wfId, runId})
-    wfExec.getWorkflowExecutionHistory({}, (err, hist) => {
+    wfExec.getWorkflowExecutionHistory({}, (err, hist: types.GraphExecutionHistory) => {
       if (err) return next(err)
       res.json({
         success: true,
         data: hist
-      })
+      } as types.GetWorkflowResp)
     })
   })
   return apiRouter

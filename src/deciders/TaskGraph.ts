@@ -52,7 +52,7 @@ export interface TaskGraphMarkerNode extends TaskGraphNode {
     status: string
   }
 }
-type AllNodeTypes = TaskGraphNode | TaskGraphGraphNode | TaskGraphMarkerNode
+export type AllNodeTypes = TaskGraphNode | TaskGraphGraphNode | TaskGraphMarkerNode
 function isTaskGraphGraphNode(node: AllNodeTypes): node is TaskGraphGraphNode {
   return node.type === 'decision' && node.handler === 'taskGraph'
 }

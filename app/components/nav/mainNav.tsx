@@ -6,7 +6,7 @@ import { Toolbar, ToolbarGroup, ToolbarTitle, ToolbarSeparator } from 'material-
 import WorkflowToolGroup, {IWorkflowToolGroup, IWorkflowToolGroupP, IWorkflowToolGroupD} from './workflowToolGroup'
 import DomainMenu, {IDomainMenu, IDomainMenuP, IDomainMenuD} from './domainMenu'
 import { domainSelected, getWorkflows, startChangeWorkflow } from '../../actions'
-import { IWorkflowId, IWorkflowInfo } from '../../types'
+import { AllState } from '../../types'
 
 export interface IMainNavPropsP extends IWorkflowToolGroupP, IDomainMenuP {
 }
@@ -45,12 +45,13 @@ export class MainNav extends React.Component<IMainNavProps, void> {
 
 
 const MainNavBound = connect<IMainNavPropsP, IMainNavPropsD, void>(
-  (state) => {
+  (state: AllState) => {
     return {
-      selectedDomain: state.app.selectedDomain as string,
-      domains: state.app.domains as string[],
-      selectedWorkflow: state.app.selectedWorkflow as IWorkflowId,
-      workflowStatus: state.app.workflowStatus as string,
+      selectedDomain: state.app.selectedDomain,
+      domains: state.app.domains,
+      selectedWorkflow: state.app.selectedWorkflow,
+      // TODO: getworkflow state
+      workflowStatus: 'Unknown',
       haveDomain: state.app.selectedDomain ? true : false
     } as IMainNavPropsP
   },

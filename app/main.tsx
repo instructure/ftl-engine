@@ -1,16 +1,23 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import { syncHistoryWithStore } from 'react-router-redux'
+import { browserHistory } from 'react-router'
+
 const { AppContainer } = require('react-hot-loader')
 
+import configureStore from './store/configureStore'
 import * as injectTapEventPlugin from 'react-tap-event-plugin'
 injectTapEventPlugin()
 
 import App from './app'
 
+const store = configureStore({domains: []})
+const history = syncHistoryWithStore(browserHistory, store)
+
 const rootEl = document.getElementById('root')!
 ReactDOM.render(
   <AppContainer>
-    <App />
+    <App store={store} history={history} />
   </AppContainer>,
   rootEl
 )
@@ -18,7 +25,6 @@ ReactDOM.render(
 interface HotNodeModule extends NodeModule {
   hot?: {
     accept(path: string, cb: {(): any})
-    accept()
   }
 }
 
@@ -27,15 +33,18 @@ if (hotModule.hot) {
   console.log('things are hot!')
   hotModule.hot.accept('./app/app.tsx', () => {
     console.log('Attempting to load new app')
+    let LoadApp: { new(): App }
     try {
-      var NextApp = require('./app').default
+      LoadApp = require('./app').default as { new(): App }
     } catch(e) {
       console.error(e)
+      throw e
     }
-    console.log('Have new app?', !!NextApp)
+    const NextApp = LoadApp
+    console.log('Have new app?', !!NextApp!)
     ReactDOM.render(
       <AppContainer>
-         <NextApp />
+         <NextApp store={store} history={history} />
       </AppContainer>,
       rootEl
     )

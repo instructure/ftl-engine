@@ -5,6 +5,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import DatePicker from 'material-ui/DatePicker'
 import TimePicker from 'material-ui/TimePicker'
 import { Field, reduxForm } from 'redux-form'
+import { WorkflowQueryOpts } from '../types'
 // currently the TS defs for MakeSelectable are wrong
 // as the actual method name is underscore... so hacks...
 import * as ListStuff from 'material-ui/List'
@@ -13,17 +14,10 @@ listImport['MakeSelectable'] = listImport['makeSelectable']
 
 const SelectableList = ListStuff.MakeSelectable(ListStuff.List)
 
-import {IWorkflowId, IWorkflowInfo} from '../types'
+import {WorkflowId, WorkflowInfo} from '../types'
 
-export interface WorkflowQueryOpts {
-  closedWorkflows: boolean,
-  startDate: Date,
-  startTime: Date,
-  endDate: Date,
-  endTime: Date
-}
 export interface IWorkflowSearchP extends React.Props<any> {
-  workflows: IWorkflowInfo[]
+  workflows: WorkflowInfo[]
   highlightedWorkflow: number,
   queryOpts: WorkflowQueryOpts
 }

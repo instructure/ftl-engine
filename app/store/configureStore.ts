@@ -6,11 +6,12 @@ import * as loggerMiddleware from 'redux-logger'
 import initialActions from './initialActions'
 // let us access window
 declare var window:any
+import { AllState } from '../types'
 
 const logger = loggerMiddleware()
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 export default function(props: any, state?: any) {
-  const store = createStore(
+  const store = createStore<AllState>(
     rootReducer,
     state || initialState(props),
     composeEnhancers(applyMiddleware(thunkMiddleware, logger))

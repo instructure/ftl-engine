@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
-import {IWorkflowId, IWorkflowInfo} from '../types'
+import {WorkflowId, WorkflowInfo, AllState} from '../types'
 import WorkflowSearch, {IWorkflowSearch, IWorkflowSearchP, IWorkflowSearchD} from './workflowSearch'
 
 import {stopChangeWorkflow, workflowSelected, workflowHighlighted} from './../actions'
@@ -11,7 +11,7 @@ import {getWorkflows, changeWorkflowFetch, loadWorkflow} from './../actions'
 
 export interface IWorkflowModalP extends IWorkflowSearchP {
   workflowModalOpen: boolean
-  workflows: IWorkflowInfo[]
+  workflows: WorkflowInfo[]
 }
 export interface IWorkflowModalD extends IWorkflowSearchD {
   handleWorkflowSelect(): any
@@ -59,18 +59,12 @@ export class WorkflowModal extends React.Component<IWorkflowModal, void> {
 }
 
 const WorkflowModalBound = connect<IWorkflowModalP, IWorkflowModalD, void>(
-  (state) => {
+  (state: AllState) => {
     return {
-      workflows: state.app.workflows as IWorkflowInfo[],
-      workflowModalOpen: state.app.changeWorkflow as boolean,
-      highlightedWorkflow: state.app.highlightedWorkflow as number,
-      queryOpts: {
-        closedWorkflows: (state.app.workflowFetchOpts || {}).closed || false as boolean,
-        startDate: (state.app.workflowFetchOpts || {}).startDate as Date,
-        startTime: (state.app.workflowFetchOpts || {}).startTime as Date,
-        endDate: (state.app.workflowFetchOpts || {}).endDate as Date,
-        endTime: (state.app.workflowFetchOpts || {}).endTime as Date,
-      }
+      workflows: state.app.workflows,
+      workflowModalOpen: state.app.changeWorkflow,
+      highlightedWorkflow: state.app.highlightedWorkflow,
+      queryOpts: state.app.workflowFetchOpts
     } as IWorkflowModalP
   },
   (dispatch) => {

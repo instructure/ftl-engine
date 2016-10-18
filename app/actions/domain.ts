@@ -2,6 +2,7 @@
 // I can stomach it
 import * as superagent from 'superagent'
 import { createAction, Action } from 'redux-actions'
+import {getState, AllState} from '../types'
 
 export const GOT_DOMAINS = 'gotDomains'
 export const gotDomains = createAction(GOT_DOMAINS)
@@ -13,11 +14,11 @@ export const DOMAIN_SELECTED = 'selectedDomain'
 export const domainSelected = createAction(DOMAIN_SELECTED)
 
 export function getDomains() {
-  return (dispatch, getState) => {
-    superagent.get('api/domains').
-    end((err, resp) => {
+  return (dispatch, getState: getState) => {
+    const state = getState()
+    state.app.api.listDomains((err, data) => {
       if (err) return dispatch(fetchDomainsFailed(err.message))
-      dispatch(gotDomains(resp.body.data))
+      dispatch(gotDomains(data))
     })
   }
 }

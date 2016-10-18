@@ -1,7 +1,11 @@
-import * as superagent from 'superagent'
 import { createAction, Action } from 'redux-actions'
-import {WorkflowQueryOpts} from '../components/workflowSearch'
-import {IWorkflowId} from '../types'
+import {
+  WorkflowId,
+  WorkflowQueryOpts,
+  getState,
+  AllState
+} from '../types'
+import { buildGraph } from './graph'
 
 export const GOT_WORKFLOWS = 'gotWorkflows'
 export const gotWorkflows = createAction(GOT_WORKFLOWS)
@@ -51,35 +55,29 @@ export function convertWorkflowFetchOpts(opts: WorkflowQueryOpts) {
 
 }
 export function getWorkflows() {
-  return (dispatch, getState) => {
+  return (dispatch, getState: getState) => {
     const state = getState().app
     const selectedDomain = state.selectedDomain
     const query = convertWorkflowFetchOpts(state.workflowFetchOpts || {})
     if (!selectedDomain) return dispatch(fetchWorkflowsFailed('no domain selected'))
-    superagent
-    .get(`api/domains/${selectedDomain}/workflows`)
-    .query(query)
-    .end((err, resp) => {
+    state.api.listWorkflows(selectedDomain, query, (err, data) => {
       if (err) return dispatch(fetchWorkflowsFailed(err.message))
-      dispatch(gotWorkflows(resp.body.data))
+      dispatch(gotWorkflows(data))
     })
   }
 }
 
 export function loadWorkflow() {
-  return (dispatch, getState) => {
+  return (dispatch, getState: getState) => {
     const state = getState().app
     if (!state.selectedWorkflow) return dispatch(unloadWorkflow())
     const selectedDomain = state.selectedDomain
     if (!selectedDomain) return dispatch(fetchWorkflowsFailed('no domain selected'))
-    const selectedWorkflow = state.selectedWorkflow as IWorkflowId
-    const wfId = encodeURIComponent(selectedWorkflow.workflowId)
-    const runId = encodeURIComponent(selectedWorkflow.runId)
-    superagent
-    .get(`api/domains/${selectedDomain}/workflows/${wfId}/${runId}`)
-    .end((err, resp) => {
+    const selectedWorkflow = state.selectedWorkflow
+    state.api.getWorkflow(selectedWorkflow, selectedDomain, (err, data) => {
       if (err) return dispatch(fetchWorkflowsFailed(err.message))
-      dispatch(workflowLoaded(resp.body.data))
+      dispatch(workflowLoaded(data))
+      dispatch(buildGraph(data!.wfInput.input))
     })
   }
 }
