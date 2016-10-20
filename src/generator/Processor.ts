@@ -9,8 +9,8 @@ import * as _ from 'lodash'
 import { TaskGraphNode } from '../deciders/TaskGraph'
 import { Task, ITaskBuilder } from './interfaces'
 import { TaskGraphBuilder, TaskGraphNodeDeps } from './TaskGraphBuilder'
-import { MetadataStore } from './MetadataStore'
-import { genUtil } from './util'
+import { MetadataStore, TaskFilters } from './MetadataStore'
+import { genUtil, DirState } from './util'
 
 // allow for overriding of some behavior via json
 const OPT_FILE_NAME = 'opts.json'
@@ -29,6 +29,8 @@ export interface IProcessor {
   process(args: any, cb: {(err: null | Error, tg: TaskGraphNode | null)})
   expandArgs?: {(args: any, state: MetadataStore): ExpandedArgs}
 }
+
+export type DirOpCb = {(err?: Error | null, dirState?: DirState | null, startDir?: string | null)}
 
 export class Processor implements IProcessor {
   store: MetadataStore
@@ -128,18 +130,26 @@ export class Processor implements IProcessor {
     }
   }
   processDir(args: any, dir: string, cb: {(err: Error | null, tgs: TaskGraphNode | null)}) {
-    genUtil.readDirectory(path.join(this.currentDir, dir), (err, dirInfo) => {
-      if (err) return cb(err, null)
-      if (!dirInfo) return cb(null, null)
+    const childDir = path.join(this.currentDir, dir)
+    // try and require a local index.js
+    let ProcClass = Processor
+    try {
+      ProcClass = this.requireLocal(childDir)(Processor)
+    } catch (e) {}
 
-      let ProcClass = Processor
-      const newDir = path.join(this.currentDir, dir)
-      if (dirInfo.hasIndex) {
-        ProcClass = this.requireLocal(newDir)(Processor)
-      }
-      const processor = new ProcClass(this.store, newDir, dirInfo.files, dirInfo.dirs)
-      // clone args before passing into new processor so we don't step on each other
-      processor.process(_.clone(args), cb)
+    ProcClass.getStartDir(childDir, this.store, (err, startDir) => {
+      if (err) return cb(err, null)
+      if (!startDir) return cb(new Error('missing dir in getStartDir'), null)
+
+      ProcClass.getToProcess(startDir, this.store, (err, dirInfo) => {
+        if (err) return cb(err, null)
+        if (!dirInfo) return cb(null, null)
+
+        const processor = new ProcClass(this.store, startDir, dirInfo.files, dirInfo.dirs)
+        // clone args before passing into new processor so we don't step on each other
+        processor.process(_.clone(args), cb)
+      })
+
     })
   }
   buildId(args: any, name: string) {
@@ -202,5 +212,40 @@ export class Processor implements IProcessor {
   }
   getMaxRetry(): number {
     return this.opts.maxRetry || GRAPH_MAX_RETRY
+  }
+  // allow for overriding the start dir
+  static getStartDir(dir: string, store: MetadataStore, cb: {(err?: Error | null, dir?: string | null)}) {
+    cb(null, dir)
+  }
+  static readDirectory(dir, store: MetadataStore, cb: DirOpCb) {
+    genUtil.readDirectory(dir, cb)
+  }
+  static getToProcess(dir: string, store: MetadataStore, cb: DirOpCb) {
+    this.readDirectory(dir, store, (err, dirInfo) => {
+      if (err) return cb(err)
+      if (!dirInfo) return cb()
+      this.filterToProcess(dirInfo, store, cb)
+    })
+  }
+  static filterToProcess(dirState: DirState, store: MetadataStore, cb: DirOpCb) {
+    const filters = store.getFilters()
+    let newDirInfo = dirState
+    if (filters.include) {
+      const filt = filters.include!
+      const files = newDirInfo.files.filter((f) => genUtil.matchesOne(f, filt))
+      const dirs = newDirInfo.dirs.filter((d) => genUtil.matchesOne(d, filt))
+      newDirInfo = {files, dirs}
+    }
+    if (filters.exclude) {
+      const filt = filters.exclude!
+      const files = newDirInfo.files.filter((f) => !genUtil.matchesOne(f, filt))
+      const dirs = newDirInfo.dirs.filter((d) => !genUtil.matchesOne(d, filt))
+      newDirInfo = {files, dirs}
+    }
+    cb(null, newDirInfo)
+
+    dirState
+
+
   }
 }

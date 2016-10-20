@@ -10,7 +10,7 @@ import { Config } from '../Config'
 import { ActivityWorker, DeciderWorker } from '../workers'
 import { registration, InitedEntities } from '../init'
 import { validator } from './validator'
-import { Processor, genUtil, MetadataStore } from '../generator'
+import { Processor, MetadataStore } from '../generator'
 import { StringToStream } from './StringToStream'
 
 export class Cli {
@@ -119,7 +119,7 @@ export class Cli {
 
       workflow.startWorkflow(args.id, workInput, initialEnv, {}, (err, info) => {
         if (err) return cb(err)
-        if (info) config.logger.info(info.toString())
+        if (info) config.logger.info('started new workflow', {info: info})
         cb()
       })
     })
@@ -215,8 +215,8 @@ export class Cli {
 
     const toRun = path.join(process.cwd(), args.directory)
     let initialMeta = {}
-    const exclude: string[] = args.exclude ? args.exclude.split(',') : []
-    const whitelist: string[] = args.whitelist ? args.whitelist.split(',') : []
+    const exclude: RegExp[] = args.exclude ? args.exclude.split(',').map((s) => new RegExp(s)) : []
+    const whitelist: RegExp[] = args.whitelist ? args.whitelist.split(',').map((s) => new RegExp(s)) : []
     if (args.data) {
       let isJsonStr = false
       try {
@@ -228,23 +228,19 @@ export class Cli {
         initialMeta = require(path.join(process.cwd(), args.data))
       }
     }
-    genUtil.readDirectory(toRun, function(err, info) {
+    const store = new MetadataStore(initialMeta, {include: whitelist, exclude: exclude})
+    Processor.getToProcess(toRun, store, (err, info) => {
       if (err) return cb(err)
       if (!info) return cb(new Error('unexpected, missing info'))
-      // exclude directories
-      if (whitelist.length) {
-        info.dirs = whitelist
-      } else {
-        info.dirs = _.difference(info.dirs, exclude)
-      }
-      if (err) throw err
-      let p = new Processor(new MetadataStore(initialMeta), toRun, info.files, info.dirs)
+
+      const p = new Processor(store, toRun, info.files, info.dirs)
       p.process({}, function(err, output) {
         if (err) throw err
         const instream = new StringToStream(JSON.stringify(output, null, 2))
 
         instream.pipe(outStream)
       })
+
     })
   }
 }

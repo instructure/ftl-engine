@@ -1,8 +1,15 @@
 import { ITaskBuilder } from './interfaces'
+export interface TaskFilters {
+  include?: RegExp[],
+  exclude?: RegExp[]
+}
+
 export class MetadataStore {
   private state: any
-  constructor(initial: Object) {
+  private filters: TaskFilters
+  constructor(initial: Object, filters: TaskFilters = {}) {
     this.state = initial
+    this.filters = filters
   }
   updateState(taskBuilder: ITaskBuilder, cb: {(err?: Error)}) {
     if (!taskBuilder.setState) return cb()
@@ -14,5 +21,8 @@ export class MetadataStore {
   }
   getState() {
     return this.state
+  }
+  getFilters() {
+    return this.filters
   }
 }
