@@ -119,7 +119,7 @@ export class Cli {
 
       workflow.startWorkflow(args.id, workInput, initialEnv, {}, (err, info) => {
         if (err) return cb(err)
-        config.logger.info(info)
+        if (info) config.logger.info(info.toString())
         cb()
       })
     })
