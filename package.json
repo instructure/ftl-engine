@@ -12,7 +12,7 @@
     "build-full": "npm run clean && npm run typings && tsc",
     "build": "tsc",
     "typings": "npm run typings-clean && typings install",
-    "typings-clean": "rm -rf src/typings",
+    "typings-clean": "rm -rf typings",
     "prepublish": "npm run build-full",
     "coverage": "npm run build && istanbul cover _mocha --  build/test/*Test.js build/test/**/*Test.js"
   },
