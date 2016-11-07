@@ -232,6 +232,8 @@ export class Cli {
     Processor.getToProcess(toRun, store, (err, info) => {
       if (err) return cb(err)
       if (!info) return cb(new Error('unexpected, missing info'))
+      if (!info.files || !info.dirs) return cb(new Error('unexpected, missing info'))
+      if (info.files.length === 0 && info.dirs.length === 0) return cb(new Error('empty workflow'))
 
       const p = new Processor(store, toRun, info.files, info.dirs)
       p.process({}, function(err, output) {

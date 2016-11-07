@@ -230,13 +230,13 @@ export class Processor implements IProcessor {
   static filterToProcess(dirState: DirState, store: MetadataStore, cb: DirOpCb) {
     const filters = store.getFilters()
     let newDirInfo = dirState
-    if (filters.include) {
+    if (filters.include && filters.include.length) {
       const filt = filters.include!
       const files = newDirInfo.files.filter((f) => genUtil.matchesOne(f, filt))
       const dirs = newDirInfo.dirs.filter((d) => genUtil.matchesOne(d, filt))
       newDirInfo = {files, dirs}
     }
-    if (filters.exclude) {
+    if (filters.exclude && filters.exclude.length) {
       const filt = filters.exclude!
       const files = newDirInfo.files.filter((f) => !genUtil.matchesOne(f, filt))
       const dirs = newDirInfo.dirs.filter((d) => !genUtil.matchesOne(d, filt))
