@@ -1,6 +1,15 @@
 import ScriptTask from '../../src/activities/script'
 import { assert } from 'chai'
+import * as fs from 'fs'
+import * as path from 'path'
 
+function writeAndBuild(name, script, cb) {
+  const fp = path.join(__dirname, `${name}.sh`)
+  fs.writeFile(fp, script, {mode: 0o766}, (err) => {
+    if (err) return cb(err)
+    cb(null, fp, (d) => fs.unlink(fp, d))
+  })
+}
 describe('Script', () => {
   describe('with text script', () => {
     it('should execute a simple script with a shebang', (done) => {
@@ -35,41 +44,53 @@ describe('Script', () => {
     })
     it('should be able to be killed', (done) => {
       let s = `
-        setInterval(function() {
-          console.log('bah')
-        }, 40)
-        console.log('foo')
+      #!/bin/bash
+      echo "foo"
+      while true; do
+        sleep 0.1
+        echo "bah"
+      done
       `
-      let script = new ScriptTask({script: s, command: 'node', args: ['-e']})
-      script.run((err, result) => {
+      writeAndBuild('long', s, (err, fullPath, onDone) => {
         if (err) throw err
-        throw new Error('should not be called')
-      })
-      script.stop((err, status) => {
-        if (err) return done(err)
-        assert.match(status, /.*SIGTERM.*/)
-        done()
+        let script = new ScriptTask({script: fullPath, command: 'sh', args: ['-c']})
+        script.run((err, result) => {
+          if (err) throw err
+          throw new Error('should not be called')
+        })
+        setTimeout(() => {
+          script.stop((err, status) => {
+            if (err) return done(err)
+            assert.match(status, /.*SIGTERM.*/)
+            onDone(done)
+          })
+        }, 150)
       })
     })
     it('should be able to force kill if it times out', (done) => {
       let s = `
-      setInterval(function() {
-        console.log('bah')
-      }, 40)
-      process.on('SIGTERM', function() { console.log('ignore!') })
+      #!/bin/bash
+      trap "echo ignore!" SIGTERM
+      while true; do
+        sleep 0.1
+        echo "bah"
+      done
       `
-      let script = new ScriptTask({script: s, command: 'node', args: ['-e']})
-      script.run((err, result) => {
+      writeAndBuild('sigterm', s, (err, fullPath, onDone) => {
         if (err) throw err
-        throw new Error('should not be called')
-      })
-      setTimeout(() => {
-        script.stop((err, status) => {
-          if (err) return done(err)
-          assert.match(status, /.*SIGKILL.*/)
-          done()
+        let script = new ScriptTask({script: fullPath, command: 'sh', args: ['-c']})
+        script.run((err, result) => {
+          if (err) throw err
+          throw new Error('should not be called')
         })
-      }, 100)
+        setTimeout(() => {
+          script.stop((err, status) => {
+            if (err) return done(err)
+            assert.match(status, /.*SIGKILL.*/)
+            onDone(done)
+          })
+        }, 150)
+      })
     })
   })
 })

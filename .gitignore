@@ -6,3 +6,4 @@ coverage/
 npm-debug.log
 debug.json
 .idea/*
+.nyc_output
