@@ -1,6 +1,10 @@
-sudo: required
-services:
-  - docker
+language: node_js
+node_js:
+  - "5"
+  - "6"
+  - "7"
 
 script:
-  - ./build.sh
+  - npm test
+  - npm upload_cov
+

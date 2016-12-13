@@ -53,7 +53,7 @@ describe('Script', () => {
       `
       writeAndBuild('long', s, (err, fullPath, onDone) => {
         if (err) throw err
-        let script = new ScriptTask({script: fullPath, command: 'sh', args: ['-c']})
+        let script = new ScriptTask({script: fullPath, command: '/bin/bash', args: ['-c']})
         script.run((err, result) => {
           if (err) throw err
           throw new Error('should not be called')
@@ -78,7 +78,7 @@ describe('Script', () => {
       `
       writeAndBuild('sigterm', s, (err, fullPath, onDone) => {
         if (err) throw err
-        let script = new ScriptTask({script: fullPath, command: 'sh', args: ['-c']})
+        let script = new ScriptTask({script: fullPath, command: '/bin/bash', args: ['-c']})
         script.run((err, result) => {
           if (err) throw err
           throw new Error('should not be called')

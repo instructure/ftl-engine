@@ -6,7 +6,7 @@
   "scripts": {
     "pretest": "npm run build",
     "test": "nyc mocha --require source-map-support/register build/test/*Test.js build/test/**/*Test.js && npm run lint",
-    "posttest": "nyc report --reporter=json && codecov -f coverage/*.json",
+    "upload_cov": "nyc report --reporter=json && codecov -f coverage/*.json",
     "testSingle": "./testSingle.sh",
     "lint": "tslint src/*.ts src/**/*.ts",
     "clean": "rm -rf build",
