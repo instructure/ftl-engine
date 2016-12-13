@@ -29,7 +29,7 @@
   "author": "addisonj",
   "license": "MIT",
   "devDependencies": {
-    "@types/async": "^2.0.32",
+    "@types/async": "2.0.32",
     "@types/bunyan": "0.0.31",
     "@types/chai": "^3.4.34",
     "@types/es6-promise": "0.0.32",
