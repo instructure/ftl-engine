@@ -56,7 +56,6 @@ export class BaseActivity extends SWFActivity {
       let textStatus: string
       if (typeof status === 'string') {
         textStatus = status
-
       } else {
         textStatus = 'success'
         info = status

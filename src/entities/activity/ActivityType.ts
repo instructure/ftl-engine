@@ -30,6 +30,5 @@ export class ActivityType extends SWFActivtyType implements BaseHandler {
   }
   getMaxRetry(): number | null {
     return this.ActivityHandler.maxRetry || null
-
   }
 }
