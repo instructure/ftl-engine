@@ -52,7 +52,7 @@ export class Config {
       this.fieldSerializer = this.buildFieldSerializer(claimCheck, userConfig.fieldSerializer)
 
     } else {
-      this.fieldSerializer = userConfig.fieldSerializer
+      this.fieldSerializer = userConfig.fieldSerializer.instance
     }
   }
   buildNotifierInstance(notifierConfig: any): Notifier {

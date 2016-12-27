@@ -27,8 +27,8 @@ const validator = {
       } else {
         return `task id: ${toCheck.id}, name: ${toCheck.name} gave an invalid type`
       }
-      if (!handler) return `${toCheck.type || 'activity'} node name: ${toCheck.name},
-       id: ${toCheck.id} did not define a known handler, gave ${toCheck.handler}`
+      if (!handler) return `${toCheck.type || 'activity'} node name: ${toCheck.name} ` +
+         `id: ${toCheck.id} did not define a known handler, gave ${toCheck.handler}`
       let invalidReason = handler.validateTask(toCheck.parameters)
       if (invalidReason) {
         return `task ${toCheck.name}, id: ${toCheck.id}, handler: ${toCheck.handler}, was invalid: ${invalidReason}`
