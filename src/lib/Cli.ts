@@ -31,8 +31,16 @@ export class Cli {
     this.cli = yargs
     .usage('Usage: $0 -c <jsConf> <command> [args...]')
     .demand(1)
+    .command('validate <input>', 'validate that file (or - for stdin) is a valid job', (yargs) => {
+      return yargs.reset().option('config', {
+        alias: 'c',
+        describe: 'js config module to load',
+        demand: true,
+        string: true
+      }).fail(this.printStack.bind(this, yargs)) as any
+    }, this.validate.bind(this, cb))
     .command('submit <input>', 'submit the file (or - for stdin) as an ftl-engine task', (yargs) => {
-    return yargs.reset().option('config', {
+      return yargs.reset().option('config', {
         alias: 'c',
         describe: 'js config module to load',
         demand: true,
@@ -86,41 +94,56 @@ export class Cli {
     this.cli.argv
     return this.cli
   }
+  validateTask(args: any, cb: {(err?: Error | null, workInput?: any)}) {
+    const inputFile = args.input
+    const config = this.loadConfig(args.config)
+
+    let source: string | null = null
+    if (inputFile === '-') {
+      source = '/dev/stdin'
+    } else {
+      source = path.join(path.resolve(process.cwd(), inputFile))
+    }
+
+    let workInput: any | null = null
+    try {
+      workInput = JSON.parse(fs.readFileSync(source).toString())
+    } catch (e) {
+      return cb(e)
+    }
+    if (!workInput) {
+      return cb(new Error('invalid work input'))
+    }
+
+    const failureReason = validator.validate(config, workInput)
+    if (failureReason) {
+      config.logger.error('invalid job')
+      config.logger.error(failureReason)
+      return cb(new Error('invalid job'))
+    }
+    cb(null, workInput)
+  }
+  validate(cb: {(Error?)}, args: any) {
+    this.validateTask(args, (err) => {
+      if (err) return process.nextTick(() => cb(err))
+      this.config.logger.info('valid job')
+      process.nextTick(cb)
+    })
+  }
   submit(cb: {(Error?)}, args: any) {
-    this.init(args.config, (err, entities) => {
+    this.validateTask(args, (err, workInput) => {
       if (err) return cb(err)
-      const inputFile = args.input
-      let {config, workflow} = entities!
 
-      let source: string | null = null
-      if (inputFile === '-') {
-        source = '/dev/stdin'
-      } else {
-        source = path.join(path.resolve(process.cwd(), inputFile))
-      }
-
-      let workInput: any | null = null
-      try {
-        workInput = JSON.parse(fs.readFileSync(source).toString())
-      } catch (e) {
-        return cb(e)
-      }
-      if (!workInput) {
-        return cb(new Error('invalid work input'))
-      }
-
-      const failureReason = validator.validate(config, workInput)
-      if (failureReason) {
-        config.logger.error('invalid job')
-        config.logger.error(failureReason)
-        return cb(new Error('invalid job'))
-      }
-      let initialEnv = workInput.env || {}
-
-      workflow.startWorkflow(args.id, workInput, initialEnv, {}, (err, info) => {
+      this.init(args.config, (err, entities) => {
         if (err) return cb(err)
-        if (info) config.logger.info('started new workflow', {info: info})
-        cb()
+        let {config, workflow} = entities!
+        let initialEnv = workInput.env || {}
+
+        workflow.startWorkflow(args.id, workInput, initialEnv, {}, (err, info) => {
+          if (err) return cb(err)
+          if (info) config.logger.info('started new workflow', {info: info})
+          cb()
+        })
       })
     })
   }
@@ -135,10 +158,15 @@ export class Cli {
       this.startWorkers(args, cb)
     })
   }
-  init(configFile: string, cb: {(err: Error | null, entities?: InitedEntities )}) {
+  loadConfig(configFile: string): Config {
+    if (this.config) return this.config
     const configFunc = require(path.join(process.cwd(), configFile))
     const config = new Config(configFunc)
     this.config = config
+    return config
+  }
+  init(configFile: string, cb: {(err: Error | null, entities?: InitedEntities )}) {
+    const config = this.loadConfig(configFile)
     registration.init(config, (err, entities) => {
       if (err) return cb(err)
       this.activityWorker = entities!.activityWorker
