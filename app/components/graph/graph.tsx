@@ -43,14 +43,21 @@ export default class Graph<T> extends React.Component<IGraph<T>, void> {
     // make slighly longer
     return radius * 1.4
   }
+  componentWillMount() {
+    const {width, height} = this.props
+    const nodes = this.props.nodes!
+    const links = this.props.links!
+
+    this.nodeRadius = this.computeNodeRadius(width, height, nodes.length)
+
+  }
   componentDidMount() {
     this.nodesById = {}
     const {width, height} = this.props
     const nodes = this.props.nodes!
     const links = this.props.links!
 
-    this.nodeRadius = this.computeNodeRadius(width, height, nodes.length)
-    this.linkDistance = this.computeLinkDistance(this.nodeRadius)
+    this.linkDistance = this.computeLinkDistance(this.nodeRadius!)
     nodes[0] = this.setPosStartNode(nodes[0], width, height, nodes.length)
     nodes[nodes.length - 1] = this.setPosEndNode(nodes[nodes.length - 1], width, height, nodes.length)
     this.layout = d3Force
@@ -63,7 +70,7 @@ export default class Graph<T> extends React.Component<IGraph<T>, void> {
     .force('center',
       d3Force.forceCenter(Math.round(width / 2), Math.round(height / 2))
     )
-    .force('collision', d3Force.forceCollide(this.nodeRadius))
+    .force('collision', d3Force.forceCollide(this.nodeRadius!))
     .on('tick', () => {
       this.props.layoutUpdated(nodes, links)
     })
@@ -72,7 +79,9 @@ export default class Graph<T> extends React.Component<IGraph<T>, void> {
     this.layout = null
   }
   buildChildren() {
+    console.log('buildChilren', this.nodeRadius)
     return this.props.nodes.map((node) => {
+      console.log('rendering', node, this.nodeRadius)
       return (
         <circle cx={node.x} cy={node.y} r={this.nodeRadius} />
       )
