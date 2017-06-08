@@ -110,7 +110,7 @@ describe('validator', () => {
             ]
           }
         }
-        assert.match(validator.validate(mockConfig, 'blah'), /must be decision task/)
+        assert.match(validator.validate(mockConfig, 'blah')!, /must be decision task/)
       })
       it('should complain about tasks that are not valid objects', () => {
         const wf = {
@@ -124,7 +124,7 @@ describe('validator', () => {
             ]
           }
         }
-        assert.match(validator.validate(mockConfig, wf), /task is malformed/)
+        assert.match(validator.validate(mockConfig, wf)!, /task is malformed/)
       })
       const baseTask = {
         name: 'mock',
@@ -137,7 +137,7 @@ describe('validator', () => {
         if (k === 'type') continue
         const wf = _.omit(_.clone(baseTask), k)
         it(`should complain if task has no ${k} field`, () => {
-          assert.match(validator.validate(mockConfig, wf), new RegExp(`does not .* ${k}`))
+          assert.match(validator.validate(mockConfig, wf)!, new RegExp(`does not .* ${k}`))
         })
       }
       it('should complain if no handler is found', () => {
@@ -149,7 +149,7 @@ describe('validator', () => {
           handler: 'notFound',
           parameters: {}
         }
-        assert.match(validator.validate(mockConfig, wf), /did not define a known handler/)
+        assert.match(validator.validate(mockConfig, wf)!, /did not define a known handler/)
       })
       it('should complain if handler rejects', () => {
         nextDecHandler = mockHandler
@@ -161,7 +161,7 @@ describe('validator', () => {
           handler: 'mock',
           parameters: {}
         }
-        assert.match(validator.validate(mockConfig, wf), /this is really silly/)
+        assert.match(validator.validate(mockConfig, wf)!, /this is really silly/)
       })
     })
   })

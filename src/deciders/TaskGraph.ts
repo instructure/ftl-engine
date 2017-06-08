@@ -121,7 +121,10 @@ export default class TaskGraph extends BaseDecider {
     }
     const failedToReFail = decisionTask.rescheduleFailedEvents()
     const failedToReTimeOut = decisionTask.rescheduleTimedOutEvents()
-    const failedToReschedule = failedToReFail.concat(failedToReTimeOut)
+    const failedToReStart = decisionTask.rescheduleFailedToSchedule()
+    const failedToReschedule = failedToReFail
+    .concat(failedToReTimeOut)
+    .concat(failedToReStart)
     if (failedToReschedule.length > 0) {
       this.logger.warn('failed to reschedule all previously failed events')
       decisionTask.failWorkflow('failed to reschedule previously failed events', JSON.stringify(failedToReschedule).slice(0, 250))

@@ -78,7 +78,7 @@ describe('BaseActivity', () => {
       act.run({parameters: {someInput: true}}, {startEnv: true}, (err, status) => {
         assert.ifError(err)
         assert.equal(status.status, 'good!')
-        assert.deepEqual(status.env, {success: true})
+        assert.deepEqual(status.env as any, {success: true})
         assert.equal(status.info, null)
         const innerAct = act.activity as TestGoodActivity
         assert(innerAct.runCalled)

@@ -222,7 +222,7 @@ describe('taskGraph', () => {
       it('should schedule only the node that is ready', () => {
         assert.equal(nextNodes.nodes.length, 1)
         assert.equal(nextNodes.nodes[0].handler, 'mock')
-        assert.equal(nextNodes.nodes[0].id, 2)
+        assert.equal(nextNodes.nodes[0].id as any, 2)
       })
     })
     describe('many children', () => {
@@ -257,9 +257,9 @@ describe('taskGraph', () => {
         assert.equal(nextNodes.nodes[0].handler, 'mock')
         assert.equal(nextNodes.nodes[1].handler, 'mock')
         assert.equal(nextNodes.nodes[2].handler, 'mock')
-        assert.equal(nextNodes.nodes[0].id, 2)
-        assert.equal(nextNodes.nodes[1].id, 3)
-        assert.equal(nextNodes.nodes[2].id, 4)
+        assert.equal(nextNodes.nodes[0].id as any, 2)
+        assert.equal(nextNodes.nodes[1].id as any, 3)
+        assert.equal(nextNodes.nodes[2].id as any, 4)
       })
     })
     describe('depend on multiple parents', () => {
@@ -294,7 +294,7 @@ describe('taskGraph', () => {
         let nextNodes = tg.getNextNodes(input.graph, dt.getGroupedEvents())
         assert.equal(nextNodes.nodes.length, 1)
         assert.equal(nextNodes.nodes[0].handler, 'mock')
-        assert.equal(nextNodes.nodes[0].id, 4)
+        assert.equal(nextNodes.nodes[0].id as any, 4)
       })
       it('should not schedule if both parents are not ready', () => {
         let nodes = [
@@ -326,7 +326,7 @@ describe('taskGraph', () => {
         let nextNodes = tg.getNextNodes(input.graph, dt.getGroupedEvents())
         assert.equal(nextNodes.nodes.length, 1)
         assert.equal(nextNodes.nodes[0].handler, 'mock')
-        assert.equal(nextNodes.nodes[0].id, 3)
+        assert.equal(nextNodes.nodes[0].id as any, 3)
       })
     })
     describe('first decision', () => {
@@ -363,11 +363,11 @@ describe('taskGraph', () => {
         let nextNodes = tg.getNextNodes(input.graph, dt.getGroupedEvents())
         assert.equal(nextNodes.nodes.length, 3)
         assert.equal(nextNodes.nodes[0].handler, 'recordMarker')
-        assert.equal(nextNodes.nodes[0].id, 1)
+        assert.equal(nextNodes.nodes[0].id as any, 1)
         assert.equal(nextNodes.nodes[1].handler, 'mock')
-        assert.equal(nextNodes.nodes[1].id, 2)
+        assert.equal(nextNodes.nodes[1].id as any, 2)
         assert.equal(nextNodes.nodes[2].handler, 'mock')
-        assert.equal(nextNodes.nodes[2].id, 3)
+        assert.equal(nextNodes.nodes[2].id as any, 3)
       })
     })
     describe('record marker', () => {
@@ -401,9 +401,9 @@ describe('taskGraph', () => {
         let nextNodes = tg.getNextNodes(input.graph, dt.getGroupedEvents())
         assert.equal(nextNodes.nodes.length, 2)
         assert.equal(nextNodes.nodes[0].handler, 'mock')
-        assert.equal(nextNodes.nodes[0].id, 2)
+        assert.equal(nextNodes.nodes[0].id as any, 2)
         assert.equal(nextNodes.nodes[1].handler, 'mock')
-        assert.equal(nextNodes.nodes[1].id, 3)
+        assert.equal(nextNodes.nodes[1].id as any, 3)
       })
       it('should add recordMarker if all parents are done or markers', () => {
         let nodes = [

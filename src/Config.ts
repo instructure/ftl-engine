@@ -85,7 +85,11 @@ export class Config {
     return new S3ClaimCheck(claimCheckConfig.bucket, claimCheckConfig.prefix, claimCheckConfig.s3Client)
   }
   buildFieldSerializer(claimChecker: ClaimCheck, fieldSerializerConfig: any): FieldSerializer {
-    return new FieldSerializer(claimChecker, fieldSerializerConfig.fields, {maxLength: fieldSerializerConfig.maxLength})
+    const opts = {
+      maxLength: fieldSerializerConfig.maxLength,
+      maxCacheItems: fieldSerializerConfig.maxCacheItems
+    }
+    return new FieldSerializer(claimChecker, fieldSerializerConfig.fields, opts)
   }
   buildActivityRegistry(activityLocations: string[]): ActivityRegistry {
     let withDefaultLocs = [path.join(__dirname, './activities')].concat(activityLocations)
