@@ -90,6 +90,7 @@ function buildDecideMock(sandbox: SinonHelper, nextNodesRet): {tg: TaskGraph, dt
   setDefaultRollup.rollup = sandbox.stubClass<EventRollup>(EventRollup)
   setDefaultRollup.rollup.getFailedEvents = () => ({activity: [], workflow: []})
   setDefaultRollup.rollup.getTimedOutEvents = () => ({activity: [], workflow: []})
+  setDefaultRollup.rollup.getRetryableFailedToScheduleEvents = () => ({activity: [], workflow: []})
   dt.object.getGroupedEvents = () => ({activity: {}, workflow: {}, completed: []})
   let tg = new TaskGraph(baseMock.c, baseMock.wf)
   tg.getNextNodes = function() {
@@ -172,6 +173,16 @@ describe('taskGraph', () => {
 
     })
     it('should fail the workflow if we fail to reschedule timedOut tasks', function() {
+      let getNext = {finished: true, nodes: []}
+      let {tg, dt, mg} = buildDecideMock(newContext(), getNext)
+      dt.expects('rescheduleFailedToSchedule').once().returns([{failed: true}])
+      dt.expects('failWorkflow').once()
+      dt.expects('completeWorkflow').never()
+
+      tg.decide(mg, dt.object)
+      dt.verify()
+    })
+    it('should fail the workflow if we fail the reschedule reryable tasks', function() {
       let getNext = {finished: true, nodes: []}
       let {tg, dt, mg} = buildDecideMock(newContext(), getNext)
       dt.expects('rescheduleTimedOutEvents').once().returns([{failed: true}])
