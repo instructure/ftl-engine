@@ -7,9 +7,11 @@ export interface TaskFilters {
 export class MetadataStore {
   private state: any
   private filters: TaskFilters
-  constructor(initial: Object, filters: TaskFilters = {}) {
+  private rootDir: string
+  constructor(initial: Object, rootDir: string, filters: TaskFilters = {}) {
     this.state = initial
     this.filters = filters
+    this.rootDir = rootDir
   }
   updateState(taskBuilder: ITaskBuilder, cb: {(err?: Error)}) {
     if (!taskBuilder.setState) return cb()
@@ -24,5 +26,8 @@ export class MetadataStore {
   }
   getFilters() {
     return this.filters
+  }
+  getRootDir() {
+    return this.rootDir
   }
 }

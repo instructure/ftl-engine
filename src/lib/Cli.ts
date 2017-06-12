@@ -77,11 +77,11 @@ export class Cli {
         string: true
       }).option('exclude', {
         alias: 'x',
-        description: 'exclude a list of top level stages to not process, comma seperated',
+        description: 'a list of regexes to match paths not to process, comma seperated',
         string: true
       }).option('whitelist', {
         alias: 'w',
-        description: 'include only a list of top level stages to process, comma seperated (takes precedence over exclude)',
+        description: 'a list of regexes to match paths to process, comma seperated (takes precedence over exclude)',
         string: true
       }).option('output', {
         alias: 'o',
@@ -256,7 +256,7 @@ export class Cli {
         initialMeta = require(path.join(process.cwd(), args.data))
       }
     }
-    const store = new MetadataStore(initialMeta, {include: whitelist, exclude: exclude})
+    const store = new MetadataStore(initialMeta, toRun, {include: whitelist, exclude: exclude})
     Processor.getToProcess(toRun, store, (err, info) => {
       if (err) return cb(err)
       if (!info) return cb(new Error('unexpected, missing info'))

@@ -227,25 +227,35 @@ export class Processor implements IProcessor {
       this.filterToProcess(dirInfo, store, cb)
     })
   }
-  static filterToProcess(dirState: DirState, store: MetadataStore, cb: DirOpCb) {
+  static filterToProcess(newDirInfo: DirState, store: MetadataStore, cb: DirOpCb) {
     const filters = store.getFilters()
-    let newDirInfo = dirState
     if (filters.include && filters.include.length) {
-      const filt = filters.include!
-      const files = newDirInfo.files.filter((f) => genUtil.matchesOne(f, filt))
-      const dirs = newDirInfo.dirs.filter((d) => genUtil.matchesOne(d, filt))
-      newDirInfo = {files, dirs}
+      newDirInfo = this.performFilter(true, filters.include!, store, newDirInfo)
     }
     if (filters.exclude && filters.exclude.length) {
-      const filt = filters.exclude!
-      const files = newDirInfo.files.filter((f) => !genUtil.matchesOne(f, filt))
-      const dirs = newDirInfo.dirs.filter((d) => !genUtil.matchesOne(d, filt))
-      newDirInfo = {files, dirs}
+      newDirInfo = this.performFilter(false, filters.exclude!, store, newDirInfo)
     }
     cb(null, newDirInfo)
-
-    dirState
-
-
+  }
+  static performFilter(include: boolean, filters: RegExp[], store: MetadataStore, dirInfo: DirState): DirState {
+    interface RelFile {
+      rp: string,
+      f: string
+    }
+    const relMaker = (f): RelFile   => {
+      const rp = path.relative(store.getRootDir(), path.join(dirInfo.baseDir, f))
+      return {rp, f}
+    }
+    const filterFunc = (f: RelFile) => {
+      const match = genUtil.matchesOne(f.rp, filters)
+      return include ? match : !match
+    }
+    const files = dirInfo.files.map(relMaker).filter(filterFunc).map((f) => f.f)
+    const dirs = dirInfo.dirs.map(relMaker).filter(filterFunc).map((f) => f.f)
+    return {
+      baseDir: dirInfo.baseDir,
+      files,
+      dirs
+    }
   }
 }

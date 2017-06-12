@@ -9,6 +9,7 @@ const validExts = ['.js']
 const noProcessRegex = /^_.*/
 
 export interface DirState {
+  baseDir: string,
   files: string[],
   dirs: string[]
 }
@@ -41,7 +42,7 @@ let genUtil = {
     fs.readdir(dir, (err, files) => {
       if (err) return cb(err, null)
       files = files.filter((f) => !noProcessRegex.test(f)).map((f) => path.join(dir, f))
-      const dirFiles: DirState = {files: [], dirs: []}
+      const dirFiles: DirState = {baseDir: dir, files: [], dirs: []}
       async.reduce(files, dirFiles, genUtil.seperateDirFiles.bind(genUtil, validExts), (err, state) => {
         if (err) return cb(err, null)
         state.files = state.files.sort()

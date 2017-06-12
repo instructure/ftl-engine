@@ -8,8 +8,8 @@ import { Task, ITaskBuilder} from '../../src/generator/interfaces'
 
 describe('Processor', () => {
   describe('with inline taskBuilder', () => {
-    const store = new MetadataStore({})
-    const dirInfo: DirState = {files: [], dirs: []}
+    const store = new MetadataStore({}, 'mock')
+    const dirInfo: DirState = {baseDir: 'mockDir', files: [], dirs: []}
     const processor = new Processor(store, "", dirInfo.files, dirInfo.dirs)
     const task = {} as Task
     it('should include maxRetry if present', (done) => {
@@ -35,7 +35,7 @@ describe('Processor', () => {
     })
   })
   describe('getStartDir', () => {
-    const store = new MetadataStore({})
+    const store = new MetadataStore({}, 'mock')
     it('should return the dir passed to it', (done) => {
       Processor.getStartDir('somePath/toHere', store, (err, newDir) => {
         assert.ifError(err)
@@ -45,7 +45,7 @@ describe('Processor', () => {
     })
   })
   describe('readDirectory', () => {
-    const store = new MetadataStore({})
+    const store = new MetadataStore({}, 'mock')
     it('should read a directries contents, filter for js files', (done) => {
       // just read our test_integration directory
       Processor.readDirectory(path.resolve(__dirname, '../../test_integration/workflow'), store, (err, info) => {
@@ -57,10 +57,11 @@ describe('Processor', () => {
     })
   })
   describe('filterToProcess', () => {
+    const wfRoot = path.resolve(__dirname, '../../test_integration/workflow')
     it('should work to remove files', (done) => {
       // just read our test_integration directory
-      const store = new MetadataStore({}, {exclude: [/ba.*/]})
-      Processor.readDirectory(path.resolve(__dirname, '../../test_integration/workflow'), store, (err, info) => {
+      const store = new MetadataStore({}, wfRoot, {exclude: [/ba.*/]})
+      Processor.readDirectory(wfRoot, store, (err, info) => {
         assert.ifError(err)
         Processor.filterToProcess(info!, store, (err, filtered) => {
           assert.ifError(err)
@@ -72,8 +73,8 @@ describe('Processor', () => {
     })
     it('should work to remove folders', (done) => {
       // just read our test_integration directory
-      const store = new MetadataStore({}, {exclude: [/next/]})
-      Processor.readDirectory(path.resolve(__dirname, '../../test_integration/workflow'), store, (err, info) => {
+      const store = new MetadataStore({}, wfRoot, {exclude: [/next/]})
+      Processor.readDirectory(wfRoot, store, (err, info) => {
         assert.ifError(err)
         Processor.filterToProcess(info!, store, (err, filtered) => {
           assert.ifError(err)
@@ -84,8 +85,8 @@ describe('Processor', () => {
       })
     })
     it('should work to only include certain files', (done) => {
-      const store = new MetadataStore({}, {include: [/ba.*/]})
-      Processor.readDirectory(path.resolve(__dirname, '../../test_integration/workflow'), store, (err, info) => {
+      const store = new MetadataStore({}, wfRoot, {include: [/ba.*/]})
+      Processor.readDirectory(wfRoot, store, (err, info) => {
         assert.ifError(err)
         Processor.filterToProcess(info!, store, (err, filtered) => {
           assert.ifError(err)
@@ -96,8 +97,8 @@ describe('Processor', () => {
       })
     })
     it('should work to have mutliple things', (done) => {
-      const store = new MetadataStore({}, {include: [/ba.*/, /next/]})
-      Processor.readDirectory(path.resolve(__dirname, '../../test_integration/workflow'), store, (err, info) => {
+      const store = new MetadataStore({}, wfRoot, {include: [/ba.*/, /next/]})
+      Processor.readDirectory(wfRoot, store, (err, info) => {
         assert.ifError(err)
         Processor.filterToProcess(info!, store, (err, filtered) => {
           assert.ifError(err)
@@ -108,8 +109,8 @@ describe('Processor', () => {
       })
     })
     it('should work to include and exclude', (done) => {
-      const store = new MetadataStore({}, {include: [/ba.*/], exclude: [/bar\.js/]})
-      Processor.readDirectory(path.resolve(__dirname, '../../test_integration/workflow'), store, (err, info) => {
+      const store = new MetadataStore({}, wfRoot, {include: [/ba.*/], exclude: [/bar\.js/]})
+      Processor.readDirectory(wfRoot, store, (err, info) => {
         assert.ifError(err)
         Processor.filterToProcess(info!, store, (err, filtered) => {
           assert.ifError(err)
@@ -122,8 +123,9 @@ describe('Processor', () => {
   })
   describe('getToProcess', () => {
     it('should work to get everything we expect to process', (done) => {
-      const store = new MetadataStore({})
-      Processor.getToProcess(path.resolve(__dirname, '../../test_integration/workflow'), store, (err, info) => {
+      const startDir = path.resolve(__dirname, '../../test_integration/workflow')
+      const store = new MetadataStore({}, startDir)
+      Processor.getToProcess(startDir, store, (err, info) => {
         assert.ifError(err)
         assert.deepEqual(info!.files, ['bar.js', 'baz.js', 'foo.js'])
         assert.deepEqual(info!.dirs, ['next'])
@@ -133,8 +135,8 @@ describe('Processor', () => {
   })
   describe('process', () => {
     it('should build a full graph', (done) => {
-      const store = new MetadataStore({})
       const startDir = path.resolve(__dirname, '../../test_integration/workflow')
+      const store = new MetadataStore({}, startDir)
       Processor.getToProcess(startDir, store, (err, info) => {
         assert.ifError(err)
         const proc = new Processor(store, startDir, info!.files, info!.dirs)
