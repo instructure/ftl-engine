@@ -8,6 +8,7 @@ import { Domain } from 'simple-swf/build/src/entities'
 import { FieldSerializer, S3ClaimCheck, ClaimCheck } from 'simple-swf/build/src/util'
 import { Logger } from './lib/Logger'
 import { Notifier, SNSNotifier, SNSNotiferConfig } from './lib/Notifier'
+import { SentryNotifier, SentryNotifierConfig } from './lib/SentryNotifier'
 import { MetricReporter, StatsDMetricReporter, StatsDMetricReporterConfig } from './lib/MetricReporter'
 import { ActivityRegistry, DeciderRegistry } from './entities'
 
@@ -38,7 +39,7 @@ export class Config {
     this.domainName = userConfig.swf.domainName
     this.workflowName = userConfig.swf.workflowName
     this.defaultVersion = userConfig.defaultVersion
-    this.notifier = userConfig.notifier.instance || this.buildNotifierInstance(userConfig.notifier)
+    this.notifier = userConfig.notifier.instance || this.buildNotifierInstance(userConfig.notifier, userConfig.notifierBackend)
     this.logger = userConfig.logger.instance || this.buildLoggerInstance(userConfig.logger)
     this.metricReporter = userConfig.metrics.instance || this.buildMetricInstance(userConfig.metrics)
     this.customOpts = this.defaultFtlConf(userConfig.ftl)
@@ -55,9 +56,16 @@ export class Config {
       this.fieldSerializer = userConfig.fieldSerializer.instance
     }
   }
-  buildNotifierInstance(notifierConfig: any): Notifier {
-    this.checkRequired('notifier', {region: 'string', snsTopicName: 'string', awsAccountId: 'string'}, notifierConfig)
-    return this.handleErrorOfComponent<SNSNotifier>(new SNSNotifier(notifierConfig as SNSNotiferConfig, this), 'notifer')
+  buildNotifierInstance(notifierConfig: any, notifierBackend: string = 'sns'): Notifier {
+    if (notifierBackend === 'sns') {
+      this.checkRequired('notifier', {region: 'string', snsTopicName: 'string', awsAccountId: 'string'}, notifierConfig)
+      return this.handleErrorOfComponent<SNSNotifier>(new SNSNotifier(notifierConfig as SNSNotiferConfig, this), 'notifer')
+    } else if (notifierBackend === 'sentry') {
+      this.checkRequired('notifier', {dsn: 'string'}, notifierConfig)
+      return this.handleErrorOfComponent<SentryNotifier>(new SentryNotifier(notifierConfig as SentryNotifierConfig, this), 'notifer')
+    } else {
+      throw new Error('unrecognized notifier backend')
+    }
   }
   buildLoggerInstance(loggerConfig: any): Logger {
     this.checkRequired('logger', {name: 'string'}, loggerConfig)

@@ -10,6 +10,7 @@ export interface Notifier extends EventEmitter {
   sendWarn(summary: string, event: Object, cb?: {(err?: Error)}): any
   sendError(summary: string, event: Object, cb?: {(err?: Error)}): any
 }
+
 export interface SNSNotiferConfig {
   snsTopicName: string
   region: string
@@ -17,7 +18,6 @@ export interface SNSNotiferConfig {
   silenceNotifier: boolean
   snsClient: SNS | null
 }
-
 
 export class SNSNotifier extends EventEmitter implements Notifier {
 
