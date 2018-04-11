@@ -7,6 +7,7 @@ import { Config } from '../../src/Config'
 import { Logger, StatsDMetricReporter, Notifier } from '../../src/lib'
 import { Decider } from 'simple-swf/build/src/entities'
 import { DecisionTask } from 'simple-swf/build/src/tasks'
+import {TaskInput} from 'simple-swf/build/src/interfaces'
 
 describe('DeciderWorker', () => {
   describe('onDecisionMade', () => {
@@ -30,6 +31,12 @@ describe('DeciderWorker', () => {
       let task = sandbox.stubClass<DecisionTask>(DecisionTask)
       task.getWorkflowInfo = function() {
         return {workflowId: 'decTask', runId: 'fake'}
+      }
+      task.getWorkflowTaskInput = function () {
+        return {
+          control: '{"unitTest":"1"}'
+        } as TaskInput
+
       }
       task.decisions = [
         {
