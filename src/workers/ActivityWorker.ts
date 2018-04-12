@@ -71,6 +71,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     execution.on('heartbeatComplete', this.onTaskHBComplete.bind(this, task, execution))
     this.ftlConfig.notifier.sendInfo('taskStarted', {
       task: taskInfo.task,
+      control: task.getControl(),
       workflow: task.getWorkflowInfo(),
       originWorkflow: task.getOriginWorkflow()
     })
@@ -100,6 +101,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     this.ftlConfig.metricReporter.increment(`activity.byHandler.${task.activityName()}.completed`)
     this.ftlConfig.notifier.sendInfo('taskFinished', {
       task: taskInfo,
+      control: task.getControl(),
       workflow: task.getWorkflowInfo(),
       originWorkflow: task.getOriginWorkflow(),
       details
@@ -112,6 +114,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     this.ftlConfig.metricReporter.increment(`activity.byHandler.${task.activityName()}.failed`)
     this.ftlConfig.notifier.sendWarn('taskFailed', {
       task: taskInfo,
+      control: task.getControl(),
       workflow: task.getWorkflowInfo(),
       originWorkflow: task.getOriginWorkflow(),
       details,
@@ -126,6 +129,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     delete this.activityTimers[task.id]
     this.ftlConfig.notifier.sendWarn('taskCanceled', {
       task: taskInfo,
+      control: task.getControl(),
       workflow: task.getWorkflowInfo(),
       originWorkflow: task.getOriginWorkflow(),
       reason: reason
@@ -137,6 +141,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     this.logInfo('unexpected task error', this.buildTaskMeta(task, { err }))
     this.ftlConfig.notifier.sendError('taskError', {
       task: taskInfo,
+      control: task.getControl(),
       workflow: task.getWorkflowInfo(),
       originWorkflow: task.getOriginWorkflow(),
       err
@@ -147,6 +152,7 @@ export class ActivityWorker extends SWFActivityWorker implements LogWorkerMixin 
     const taskInfo = {type: task.activityName(), id: execution.id}
     this.ftlConfig.notifier.sendInfo('taskHeartbeat', {
       task: taskInfo,
+      control: task.getControl(),
       workflow: task.getWorkflowInfo(),
       originWorkflow: task.getOriginWorkflow(),
       status
