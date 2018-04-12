@@ -78,7 +78,11 @@ export default class TaskGraph extends BaseDecider {
     const input = task.getWorkflowInput()
     if (input.handler !== 'taskGraph') return cb(new Error('invalid handler for taskGrah'))
     const parameters = input.parameters
-    this.decide(parameters, task)
+    try {
+      this.decide(parameters, task)
+    } catch (err) {
+      task.failWorkflow('error in decider', JSON.stringify(err).slice(0, 250))
+    }
     cb()
   }
   decide(parameters: TaskGraphParameters, decisionTask: DecisionTask) {
